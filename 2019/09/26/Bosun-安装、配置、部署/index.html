@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Bosun," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="Bosun安装、配置、部署背景日志收集采用的技术方案是elasticsearch+td-agent+kibanna。bosun可接入elasticsearch作为数据源，从而实现日志报警 介绍Bosun是由Stack Exchange团队打造的一套基于时间序列的监控预警系统，系统开源并遵守MIT协议。Bosun拥有非常强大的表达式语言，能够灵活地定义预警规则以及展示预警通知。Bosun能够让你利用">
+<meta name="keywords" content="Bosun">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Bosun-安装、配置、部署">
+<meta property="og:url" content="https://keepreal.github.io/2019/09/26/Bosun-安装、配置、部署/index.html">
+<meta property="og:site_name" content="Keep Real">
+<meta property="og:description" content="Bosun安装、配置、部署背景日志收集采用的技术方案是elasticsearch+td-agent+kibanna。bosun可接入elasticsearch作为数据源，从而实现日志报警 介绍Bosun是由Stack Exchange团队打造的一套基于时间序列的监控预警系统，系统开源并遵守MIT协议。Bosun拥有非常强大的表达式语言，能够灵活地定义预警规则以及展示预警通知。Bosun能够让你利用">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-12-18T10:17:47.510Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Bosun-安装、配置、部署">
+<meta name="twitter:description" content="Bosun安装、配置、部署背景日志收集采用的技术方案是elasticsearch+td-agent+kibanna。bosun可接入elasticsearch作为数据源，从而实现日志报警 介绍Bosun是由Stack Exchange团队打造的一套基于时间序列的监控预警系统，系统开源并遵守MIT协议。Bosun拥有非常强大的表达式语言，能够灵活地定义预警规则以及展示预警通知。Bosun能够让你利用">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://keepreal.github.io/2019/09/26/Bosun-安装、配置、部署/"/>
+
+
+
+
+
+  <title>Bosun-安装、配置、部署 | Keep Real</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Keep Real</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            目录
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/09/26/Bosun-安装、配置、部署/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="小煤球的反击">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Keep Real">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Bosun-安装、配置、部署</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-09-26T11:29:24+08:00">
+                2019-09-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Tech-Doc/" itemprop="url" rel="index">
+                    <span itemprop="name">Tech Doc</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/09/26/Bosun-安装、配置、部署/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2019/09/26/Bosun-安装、配置、部署/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Bosun安装、配置、部署"><a href="#Bosun安装、配置、部署" class="headerlink" title="Bosun安装、配置、部署"></a>Bosun安装、配置、部署</h1><h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>日志收集采用的技术方案是elasticsearch+td-agent+kibanna。bosun可接入elasticsearch作为数据源，从而实现日志报警</p>
+<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>Bosun是由Stack Exchange团队打造的一套基于时间序列的监控预警系统，系统开源并遵守MIT协议。<br>Bosun拥有非常强大的表达式语言，能够灵活地定义预警规则以及展示预警通知。<br>Bosun能够让你利用历史数据来测试预警规则，这样能大大加快开发效率。<br>可接入的数据源：OpenTSDB、Graphite、Elastic。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><h3 id="1-Docker"><a href="#1-Docker" class="headerlink" title="1.Docker"></a>1.Docker</h3><p>（1）Docker支持的版本</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0.5.0, latest Release Notes</span><br><span class="line">0.6.0-pre 1a9d75de9668515429859d8486554e7425ba45ca</span><br></pre></td></tr></table></figure>
+<p>（2）安装命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 4242:4242 -p 8070:8070 stackexchange/bosun</span><br></pre></td></tr></table></figure>
+<p>（3）升级</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ apt-get update &amp;&amp; apt-get install -y wget </span><br><span class="line">$ wget -O /bosun/bosun &amp;lt;bosun-release-URL&amp;gt;</span><br><span class="line">$ kill -HUP 1</span><br></pre></td></tr></table></figure>
+<h2 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h2><p>0.6.0之后的版本，配置文件为bosun.toml和规则配置文件</p>
+<h3 id="ElasticSearch配置"><a href="#ElasticSearch配置" class="headerlink" title="ElasticSearch配置"></a>ElasticSearch配置</h3><p>在ElasticConf配置项下配置集群，默认为default集群，在后面查询数据时不指定集群时默认为default集群。<br>Hosts：集群列表<br>Version： 接入的es版本，支持v2，v5，v6<br>SimpleClient：设置为true</p>
+<h3 id="邮箱配置"><a href="#邮箱配置" class="headerlink" title="邮箱配置"></a>邮箱配置</h3><p>SMTPConf用来配置邮件发送的信息<br>EmailFrom：发送邮件的邮箱<br>Host：发送邮件服务器<br>Username：用户名<br>Password：密码</p>
+<h3 id="DB配置"><a href="#DB配置" class="headerlink" title="DB配置"></a>DB配置</h3><p>Bosun的内部存储器，用来存储预警事件等信息。<br>DB可以选择redis和go内置的ledis，默认时ledis。当配置了RedisHost时，Ledis的相关配置会失效。在生产环境上建议使用redis。<br>RedisHost：redis的地址<br>RedisDb：指定redis的db，默认为0<br>RedisPassword：redis密码</p>
+<h3 id="API设置"><a href="#API设置" class="headerlink" title="API设置"></a>API设置</h3><p>设置为True时，可以通过api和ui来保存规则配置文件，默认为False</p>
+<h3 id="Rule-conf文件路径配置"><a href="#Rule-conf文件路径配置" class="headerlink" title="Rule conf文件路径配置"></a>Rule conf文件路径配置</h3><p>规则文件的路径以及文件名配置</p>
+<h2 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h2><p>$ bosun -c /data/bosun.toml</p>
+<p>生产环境上可在supervisor中启动。<br>启动成功后，访问<a href="http://127.0.0.1:8080/" target="_blank" rel="noopener">http://127.0.0.1:8080/</a></p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Bosun/" rel="tag"># Bosun</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/09/26/Bosun-Bosun提供的Api/" rel="next" title="Bosun--Bosun提供的Api">
+                <i class="fa fa-chevron-left"></i> Bosun--Bosun提供的Api
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/09/26/Bosun-Bosun中es表达语法/" rel="prev" title="Bosun--Bosun中es表达语法">
+                Bosun--Bosun中es表达语法 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">小煤球的反击</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">41</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">6</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Bosun安装、配置、部署"><span class="nav-number">1.</span> <span class="nav-text">Bosun安装、配置、部署</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#背景"><span class="nav-number">1.1.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#介绍"><span class="nav-number">1.2.</span> <span class="nav-text">介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装"><span class="nav-number">1.3.</span> <span class="nav-text">安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Docker"><span class="nav-number">1.3.1.</span> <span class="nav-text">1.Docker</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置文件"><span class="nav-number">1.4.</span> <span class="nav-text">配置文件</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#ElasticSearch配置"><span class="nav-number">1.4.1.</span> <span class="nav-text">ElasticSearch配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#邮箱配置"><span class="nav-number">1.4.2.</span> <span class="nav-text">邮箱配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DB配置"><span class="nav-number">1.4.3.</span> <span class="nav-text">DB配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#API设置"><span class="nav-number">1.4.4.</span> <span class="nav-text">API设置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Rule-conf文件路径配置"><span class="nav-number">1.4.5.</span> <span class="nav-text">Rule conf文件路径配置</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#部署"><span class="nav-number">1.5.</span> <span class="nav-text">部署</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">小煤球的反击</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'MyZhang0826',
+            repo: 'MyZhang0826.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: 'cfafef229f9f761d8a571819bdcafb1a606eb4df',
+            
+                client_id: '7ed081268804809cadd9'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -301,6 +301,28 @@
           </span>
 
           
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Tech-Doc/" itemprop="url" rel="index">
+                    <span itemprop="name">Tech Doc</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
 
           
             
@@ -440,6 +462,28 @@
           </span>
 
           
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Tech-Doc/" itemprop="url" rel="index">
+                    <span itemprop="name">Tech Doc</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
 
           
             
@@ -575,6 +619,28 @@
           </span>
 
           
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Tech-Doc/" itemprop="url" rel="index">
+                    <span itemprop="name">Tech Doc</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
 
           
             
@@ -685,6 +751,163 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/09/26/Bosun-安装、配置、部署/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="小煤球的反击">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Keep Real">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/09/26/Bosun-安装、配置、部署/" itemprop="url">Bosun-安装、配置、部署</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-09-26T11:29:24+08:00">
+                2019-09-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Tech-Doc/" itemprop="url" rel="index">
+                    <span itemprop="name">Tech Doc</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Bosun安装、配置、部署"><a href="#Bosun安装、配置、部署" class="headerlink" title="Bosun安装、配置、部署"></a>Bosun安装、配置、部署</h1><h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>日志收集采用的技术方案是elasticsearch+td-agent+kibanna。bosun可接入elasticsearch作为数据源，从而实现日志报警</p>
+<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>Bosun是由Stack Exchange团队打造的一套基于时间序列的监控预警系统，系统开源并遵守MIT协议。<br>Bosun拥有非常强大的表达式语言，能够灵活地定义预警规则以及展示预警通知。<br>Bosun能够让你利用历史数据来测试预警规则，这样能大大加快开发效率。<br>可接入的数据源：OpenTSDB、Graphite、Elastic。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><h3 id="1-Docker"><a href="#1-Docker" class="headerlink" title="1.Docker"></a>1.Docker</h3><p>（1）Docker支持的版本</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0.5.0, latest Release Notes</span><br><span class="line">0.6.0-pre 1a9d75de9668515429859d8486554e7425ba45ca</span><br></pre></td></tr></table></figure>
+<p>（2）安装命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 4242:4242 -p 8070:8070 stackexchange/bosun</span><br></pre></td></tr></table></figure>
+<p>（3）升级</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ apt-get update &amp;&amp; apt-get install -y wget </span><br><span class="line">$ wget -O /bosun/bosun &amp;lt;bosun-release-URL&amp;gt;</span><br><span class="line">$ kill -HUP 1</span><br></pre></td></tr></table></figure>
+<h2 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h2><p>0.6.0之后的版本，配置文件为bosun.toml和规则配置文件</p>
+<h3 id="ElasticSearch配置"><a href="#ElasticSearch配置" class="headerlink" title="ElasticSearch配置"></a>ElasticSearch配置</h3><p>在ElasticConf配置项下配置集群，默认为default集群，在后面查询数据时不指定集群时默认为default集群。<br>Hosts：集群列表<br>Version： 接入的es版本，支持v2，v5，v6<br>SimpleClient：设置为true</p>
+<h3 id="邮箱配置"><a href="#邮箱配置" class="headerlink" title="邮箱配置"></a>邮箱配置</h3><p>SMTPConf用来配置邮件发送的信息<br>EmailFrom：发送邮件的邮箱<br>Host：发送邮件服务器<br>Username：用户名<br>Password：密码</p>
+<h3 id="DB配置"><a href="#DB配置" class="headerlink" title="DB配置"></a>DB配置</h3><p>Bosun的内部存储器，用来存储预警事件等信息。<br>DB可以选择redis和go内置的ledis，默认时ledis。当配置了RedisHost时，Ledis的相关配置会失效。在生产环境上建议使用redis。<br>RedisHost：redis的地址<br>RedisDb：指定redis的db，默认为0<br>RedisPassword：redis密码</p>
+<h3 id="API设置"><a href="#API设置" class="headerlink" title="API设置"></a>API设置</h3><p>设置为True时，可以通过api和ui来保存规则配置文件，默认为False</p>
+<h3 id="Rule-conf文件路径配置"><a href="#Rule-conf文件路径配置" class="headerlink" title="Rule conf文件路径配置"></a>Rule conf文件路径配置</h3><p>规则文件的路径以及文件名配置</p>
+<h2 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h2><p>$ bosun -c /data/bosun.toml</p>
+<p>生产环境上可在supervisor中启动。<br>启动成功后，访问<a href="http://127.0.0.1:8080/" target="_blank" rel="noopener">http://127.0.0.1:8080/</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/09/26/Bosun-Bosun提供的Api/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -726,6 +949,28 @@
             
           </span>
 
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Tech-Doc/" itemprop="url" rel="index">
+                    <span itemprop="name">Tech Doc</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
           
 
           
@@ -860,8 +1105,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/Bosun/" itemprop="url" rel="index">
-                    <span itemprop="name">Bosun</span>
+                  <a href="/categories/Tech-Doc/" itemprop="url" rel="index">
+                    <span itemprop="name">Tech Doc</span>
                   </a>
                 </span>
 
@@ -910,260 +1155,6 @@
 <h2 id="Save"><a href="#Save" class="headerlink" title="Save"></a>Save</h2><p>Test没问题后，点击save。弹出如下页面</p>
 <p>刷新下diff，没问题后，点击save and reload。就可以在规则配置文件里看到。<br>在bosun日志中也可以看到运行test的信息</p>
 <p>当报警触发时，发送邮件</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/09/26/Untitled/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="小煤球的反击">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Keep Real">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/09/26/Untitled/" itemprop="url">未命名</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-09-26T11:10:49+08:00">
-                2019-09-26
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/09/24/Bosun-安装、配置、部署/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="小煤球的反击">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Keep Real">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/09/24/Bosun-安装、配置、部署/" itemprop="url">未命名</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-09-24T20:22:09+08:00">
-                2019-09-24
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="Bosun安装、配置、部署"><a href="#Bosun安装、配置、部署" class="headerlink" title="Bosun安装、配置、部署"></a>Bosun安装、配置、部署</h1><h2 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h2><p>日志收集采用的技术方案是elasticsearch+td-agent+kibanna。bosun可接入elasticsearch作为数据源，从而实现日志报警</p>
-<h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>Bosun是由Stack Exchange团队打造的一套基于时间序列的监控预警系统，系统开源并遵守MIT协议。<br>Bosun拥有非常强大的表达式语言，能够灵活地定义预警规则以及展示预警通知。<br>Bosun能够让你利用历史数据来测试预警规则，这样能大大加快开发效率。<br>可接入的数据源：OpenTSDB、Graphite、Elastic。</p>
-<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><h3 id="1-Docker"><a href="#1-Docker" class="headerlink" title="1.Docker"></a>1.Docker</h3><p>（1）Docker支持的版本</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0.5.0, latest Release Notes</span><br><span class="line">0.6.0-pre 1a9d75de9668515429859d8486554e7425ba45ca</span><br></pre></td></tr></table></figure>
-<p>（2）安装命令</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 4242:4242 -p 8070:8070 stackexchange/bosun</span><br></pre></td></tr></table></figure>
-<p>（3）升级</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ apt-get update &amp;&amp; apt-get install -y wget </span><br><span class="line">$ wget -O /bosun/bosun &amp;lt;bosun-release-URL&amp;gt;</span><br><span class="line">$ kill -HUP 1</span><br></pre></td></tr></table></figure>
-<h2 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h2><p>0.6.0之后的版本，配置文件为bosun.toml和规则配置文件</p>
-<h3 id="ElasticSearch配置"><a href="#ElasticSearch配置" class="headerlink" title="ElasticSearch配置"></a>ElasticSearch配置</h3><p>在ElasticConf配置项下配置集群，默认为default集群，在后面查询数据时不指定集群时默认为default集群。<br>Hosts：集群列表<br>Version： 接入的es版本，支持v2，v5，v6<br>SimpleClient：设置为true</p>
-<h3 id="邮箱配置"><a href="#邮箱配置" class="headerlink" title="邮箱配置"></a>邮箱配置</h3><p>SMTPConf用来配置邮件发送的信息<br>EmailFrom：发送邮件的邮箱<br>Host：发送邮件服务器<br>Username：用户名<br>Password：密码</p>
-<h3 id="DB配置"><a href="#DB配置" class="headerlink" title="DB配置"></a>DB配置</h3><p>Bosun的内部存储器，用来存储预警事件等信息。<br>DB可以选择redis和go内置的ledis，默认时ledis。当配置了RedisHost时，Ledis的相关配置会失效。在生产环境上建议使用redis。<br>RedisHost：redis的地址<br>RedisDb：指定redis的db，默认为0<br>RedisPassword：redis密码</p>
-<h3 id="API设置"><a href="#API设置" class="headerlink" title="API设置"></a>API设置</h3><p>设置为True时，可以通过api和ui来保存规则配置文件，默认为False</p>
-<h3 id="Rule-conf文件路径配置"><a href="#Rule-conf文件路径配置" class="headerlink" title="Rule conf文件路径配置"></a>Rule conf文件路径配置</h3><p>规则文件的路径以及文件名配置</p>
-<h2 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h2><p>$ bosun -c /data/bosun.toml</p>
-<p>生产环境上可在supervisor中启动。<br>启动成功后，访问<a href="http://127.0.0.1:8080/" target="_blank" rel="noopener">http://127.0.0.1:8080/</a></p>
 
           
         
@@ -1332,133 +1323,6 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2018/07/15/test的副本/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="小煤球的反击">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Keep Real">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/07/15/test的副本/" itemprop="url">博客日志</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-07-15T14:06:20+08:00">
-                2018-07-15
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <pre><code>2018年7月15日，博客正式成立了
-
-2018年7月16日，评论功能上线，随后第一个访客即将到来^_^
-
-2018年7月17日，添加about、tags、categories菜单，并汉化
-</code></pre><hr>
-<p><em>他讲了个笑话：</em></p>
-<p><font color="#949494">阳台上一件衣服对另一件衣服说；“兄弟，我干了，你随意”</font><br> </p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2018/07/15/sf/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1579,6 +1443,263 @@
 
 
     
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2018/07/15/test/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="小煤球的反击">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Keep Real">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/07/15/test/" itemprop="url">博客日志</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-07-15T14:06:20+08:00">
+                2018-07-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <pre><code>2018年7月15日，博客正式成立了
+
+2018年7月16日，评论功能上线，随后第一个访客即将到来^_^
+
+2018年7月17日，添加about、tags、categories菜单，并汉化
+</code></pre><hr>
+<p><em>他讲了个笑话：</em></p>
+<p><font color="#949494">阳台上一件衣服对另一件衣服说；“兄弟，我干了，你随意”</font><br> </p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2018/07/15/problems/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="小煤球的反击">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Keep Real">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/07/15/problems/" itemprop="url">遇到的问题</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-07-15T14:06:20+08:00">
+                2018-07-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <hr>
+<pre><code>P：mac 下sudo 操作提示无权限
+S：重启、command + r、teminal、csrutil disabled
+R:  
+</code></pre><hr>
+<hr>
+<p>数据结构：大话数据结构</p>
+<p>算法：算法图解</p>
+<p>Python3:</p>
+<p>机器学习：</p>
+<p>人工智能：</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
   </section>
 
   
@@ -1629,7 +1750,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">43</span>
+                  <span class="site-state-item-count">41</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -1640,7 +1761,7 @@
               
               <div class="site-state-item site-state-categories">
                 <a href="/categories/index.html">
-                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-count">3</span>
                   <span class="site-state-item-name">分类</span>
                 </a>
               </div>
@@ -1651,7 +1772,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-count">6</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
