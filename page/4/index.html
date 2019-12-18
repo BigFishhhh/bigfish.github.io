@@ -848,6 +848,28 @@
           </span>
 
           
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Bosun/" itemprop="url" rel="index">
+                    <span itemprop="name">Bosun</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
 
           
             
@@ -1310,179 +1332,6 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2018/07/15/learn/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="小煤球的反击">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Keep Real">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/07/15/learn/" itemprop="url">学习日志</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-07-15T14:06:20+08:00">
-                2018-07-15
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="consul"><a href="#consul" class="headerlink" title="consul"></a>consul</h2><pre><code>1.client
-2.server
-3.server leader
-4.raft 节点间数据的一致性
-5.服务发现协议 dns http
-6.服务注册（api， json）
-7.服务发现（api，dns）
-8.服务间的通信协议 gossip pool (LAN pool WAN pool)
-</code></pre><h3 id="Consul定义了Service-Mesh的3个要素："><a href="#Consul定义了Service-Mesh的3个要素：" class="headerlink" title="Consul定义了Service Mesh的3个要素："></a>Consul定义了Service Mesh的3个要素：</h3><pre><code>Discovery：服务可以互相找到
-Configuration：服务在运行时，可以从一个集中的源头获取配置
-Segmentation：服务之间的通信必须是加密并通过认证的
-</code></pre><p>##Envoy </p>
-<p>是专为大型现代 SOA（面向服务架构）架构设计的 L7 代理和通信总线。即服务间的通信系统</p>
-<p>###优点：</p>
-<pre><code>* Envoy 可以使用任何应用程序语言
-* Envoy可以透明地在整个基础架构上快速部署和升级。
-</code></pre><p>###目标：<br>    使网络透明<br>1.Envoy 使用单进程 - 多线程的架构模型。一个 master 线程管理各种琐碎的任务，而一些 worker 线程则负责执行监听、过滤和转发。</p>
-<p>##微服务</p>
-<ol>
-<li><p>2 pizza 区别于系统</p>
-</li>
-<li><p>SOA Service Oriented Architecture</p>
-</li>
-<li><p>单体架构</p>
-</li>
-<li>微服务本质</li>
-<li>微服务开发框架（Spring cloud, Dubbo, Dropwizard, consul,etcd&amp;etc）</li>
-<li><p>spring boot 与spring cloud 区别</p>
-<pre><code>Spring Boot:
-旨在简化创建产品级的Spring应用和服务，简化了配置文件，使用嵌入式web服务器，含有诸多开箱即用微服务功能，可以和spring cloud联合部署。
-Spring Cloud：
-微服务工具包，为开发者提供了在分布式系统的配置管理、服务发现、断路器、智能路由、微代理、控制总线等开发工具包。
-</code></pre></li>
-<li><p>需要了解如何访问服务、服务间如何通信，服务发现，风险机制（重试，限流，熔断，降级）</p>
-</li>
-<li>API Gateway、服务间调用、服务发现、服务容错、服务部署、数据调用</li>
-<li><p>重要部件</p>
-<pre><code>服务注册中心：etcd、consul、zookeeper
-负载均衡：轮询、加权轮询、IP Hash、最少连接数（当有新的服务连接请求时，将把当前请求分配给连接数最少的服务器）
-容错：容错策略有：快速失败、失效切换、失败安全、失败自动恢复、forking cluster（并行调用多个服务器，只要有一个成功，即返回。）广播调用
-熔断：智能化容错，模式：打开、半开、关闭
-限流和降级：为系统能够处理的服务数量设置一个极限阀值，超过这个阀值的请求则直接拒绝        
-SLA：Service-LevelAgreement的缩写，意思是服务等级协议，关于网络服务供应商和客户间的一份合同，其中定义了服务类型、服务质量和客户付款等术语
-API Gateway：将所有API调用统一接入到API网关层，有网关层统一接入和输出。
-多级缓存：穿透率
-超时和重试：TP99就是满足百分之九十九的网络请求所需要的最低耗时。超时与重试机制也是容错的一种方法，凡是发生RPC调用的地方，比如读取redis，db，mq等，因为网络故障或者是所依赖的服务故障，长时间不能返回结果，就会导致线程增加，加大cpu负载，甚至导致雪崩。所以对每一个RPC调用都要设置超时时间。对于强依赖RPC调用资源的情况，还要有重试机制，但是重试的次数建议1-2次，另外如果有重试，那么超时时间就要相应的调小，比如重试1次，那么一共是发生2次调用。如果超时时间配置的是2s，那么客户端就要等待4s才能返回。因此重试+超时的方式，超时时间要调小。这里也再谈一下一次PRC调用的时间都消耗在哪些环节，一次正常的调用统计的耗时主要包括： ①调用端RPC框架执行时间 + ②网络发送时间 + ③服务端RPC框架执行时间 + ④服务端业务代码时间。调用方和服务方都有各自的性能监控，比如调用方tp99是500ms，服务方tp99是100ms，找了网络组的同事确认网络没有问题。那么时间都花在什么地方了呢，两种原因，客户端调用方，还有一个原因是网络发生TCP重传
-线程池隔离
-网关监控和统计
-</code></pre></li>
-</ol>
-<pre><code>来自：https://blog.csdn.net/wuxiaobingandbob/article/details/78642020?locationNum=1&amp;fps=1
-</code></pre><hr>
-<p><em>他讲了个：</em></p>
-<p><font color="#949494">阳台上一件衣服对另一件衣服说；“兄弟，我干了，你随意”</font><br> </p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2018/07/15/test的副本/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1597,6 +1446,139 @@ API Gateway：将所有API调用统一接入到API网关层，有网关层统一
 
 
     
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2018/07/15/sf/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="小煤球的反击">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Keep Real">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2018/07/15/sf/" itemprop="url">TSF</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-07-15T14:06:20+08:00">
+                2018-07-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>腾讯微服务平台（Tencent Service Framework，TSF）是一个围绕应用和微服务的 PaaS 平台，提供一站式服务全生命周期管理能力和数据化运营支持，提供多维度应用、服务、机器的监控数据，助力服务性能优化。提供基于 Spring Cloud 和 Service Mesh 两种微服务架构的商业化支持</p>
+<pre><code>应用场景主要包括：
+    1.构架分布式系统：用户能够将业务部署在专用宿主机的云服务器上，在资源共享的同时保证与其他用户的子机物理隔离，
+                   满足敏感业务数据保护、磁盘消磁需求。
+    2.应用的发布和管理：相对于传统的应用发布需要运维人员登录到每一台服务器进行发布和部署，
+                    TSF 针对分布式系统的应用发布和管理，提供了简单易用的可视化控制台。
+                    用户通过控制台可以发布应用，包括创建、部署、启动应用，也支持查看应用的部署状态。
+                    除此之外，用户可以通过控制台管理应用，包括回滚应用、扩容、缩容和删除应用。
+    3.数据化运营： 通过对日志埋点的收集和分析，可以得到一次请求在各个服务间的调用链关系，
+                 有助于梳理应用的请求入口与服务的调用来源、依赖关系。当遇到请求耗时较长的情况，
+                 可以通过调用链分析调用瓶颈，快速定位异常。
+    4.服务治理：支持服务级别和API级别的服务治理能力，包括服务路由、服务限流、服务鉴权功能。
+              服务路由功能支持将请求按权重路由到不同版本的服务上。        
+</code></pre><hr>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
   </section>
 
   
@@ -1654,7 +1636,25 @@ API Gateway：将所有API调用统一接入到API网关层，有网关层统一
             
 
             
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
 
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
             
 
           </nav>
