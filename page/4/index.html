@@ -259,6 +259,141 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/09/26/Pipelinedb安装、部署和使用/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="小煤球的反击">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Keep Real">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/09/26/Pipelinedb安装、部署和使用/" itemprop="url">Pipelinedb安装、部署和使用</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-09-26T11:40:51+08:00">
+                2019-09-26
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h2 id="Pipelinedb安装、部署和使用"><a href="#Pipelinedb安装、部署和使用" class="headerlink" title="Pipelinedb安装、部署和使用"></a>Pipelinedb安装、部署和使用</h2><h2 id="1-创建pipelinedb扩展"><a href="#1-创建pipelinedb扩展" class="headerlink" title="1. 创建pipelinedb扩展"></a><strong>1. 创建pipelinedb扩展</strong></h2><p>postgresql.conf配置项需要如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"># At the bottom of &lt;data directory&gt;/postgresql.conf</span><br><span class="line">shared_preload_libraries = &apos;pipelinedb&apos;</span><br><span class="line">max_worker_processes = 128</span><br></pre></td></tr></table></figure>
+<h2 id="2-运行pg10或其以上版本的数据库"><a href="#2-运行pg10或其以上版本的数据库" class="headerlink" title="2. 运行pg10或其以上版本的数据库"></a><strong>2. 运行pg10或其以上版本的数据库</strong></h2><p>数据库服务起来之后，执行如下命令</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">psql -c &quot;CREATE EXTENSION pipelinedb&quot;</span><br></pre></td></tr></table></figure>
+<p>这样就在默认的数据库创建了pipelinedb扩展插件</p>
+<p>可通过\dx查看是否安装成功</p>
+<h2 id="3-Pipelinedb的使用"><a href="#3-Pipelinedb的使用" class="headerlink" title="3. Pipelinedb的使用"></a><strong>3. Pipelinedb的使用</strong></h2><ol>
+<li><p>创建foreign table</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">CREATE FOREIGN TABLE wiki_stream (</span><br><span class="line">        hour timestamp,</span><br><span class="line">        project text,</span><br><span class="line">        title text,</span><br><span class="line">        view_count bigint,</span><br><span class="line">        size bigint)</span><br><span class="line">SERVER pipelinedb;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>创建视图</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">CREATE VIEW wiki_stats WITH (action=materialize) AS</span><br><span class="line">SELECT hour, project,</span><br><span class="line">        count(*) AS total_pages,</span><br><span class="line">        sum(view_count) AS total_views,</span><br><span class="line">        min(view_count) AS min_views,</span><br><span class="line">        max(view_count) AS max_views,</span><br><span class="line">        avg(view_count) AS avg_views,</span><br><span class="line">        percentile_cont(0.99) WITHIN GROUP (ORDER BY view_count) AS p99_views,</span><br><span class="line">        sum(size) AS total_bytes_served</span><br><span class="line">FROM wiki_stream</span><br><span class="line">GROUP BY hour, project;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>查询视图</p>
+</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SELECT * FROM wiki_stats ORDER BY total_views DESC</span><br></pre></td></tr></table></figure>
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/09/26/Bosun-Bosun中es表达语法/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1413,179 +1548,6 @@ R:
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2018/07/15/learn/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="小煤球的反击">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Keep Real">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2018/07/15/learn/" itemprop="url">学习日志</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-07-15T14:06:20+08:00">
-                2018-07-15
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h2 id="consul"><a href="#consul" class="headerlink" title="consul"></a>consul</h2><pre><code>1.client
-2.server
-3.server leader
-4.raft 节点间数据的一致性
-5.服务发现协议 dns http
-6.服务注册（api， json）
-7.服务发现（api，dns）
-8.服务间的通信协议 gossip pool (LAN pool WAN pool)
-</code></pre><h3 id="Consul定义了Service-Mesh的3个要素："><a href="#Consul定义了Service-Mesh的3个要素：" class="headerlink" title="Consul定义了Service Mesh的3个要素："></a>Consul定义了Service Mesh的3个要素：</h3><pre><code>Discovery：服务可以互相找到
-Configuration：服务在运行时，可以从一个集中的源头获取配置
-Segmentation：服务之间的通信必须是加密并通过认证的
-</code></pre><p>##Envoy </p>
-<p>是专为大型现代 SOA（面向服务架构）架构设计的 L7 代理和通信总线。即服务间的通信系统</p>
-<p>###优点：</p>
-<pre><code>* Envoy 可以使用任何应用程序语言
-* Envoy可以透明地在整个基础架构上快速部署和升级。
-</code></pre><p>###目标：<br>    使网络透明<br>1.Envoy 使用单进程 - 多线程的架构模型。一个 master 线程管理各种琐碎的任务，而一些 worker 线程则负责执行监听、过滤和转发。</p>
-<p>##微服务</p>
-<ol>
-<li><p>2 pizza 区别于系统</p>
-</li>
-<li><p>SOA Service Oriented Architecture</p>
-</li>
-<li><p>单体架构</p>
-</li>
-<li>微服务本质</li>
-<li>微服务开发框架（Spring cloud, Dubbo, Dropwizard, consul,etcd&amp;etc）</li>
-<li><p>spring boot 与spring cloud 区别</p>
-<pre><code>Spring Boot:
-旨在简化创建产品级的Spring应用和服务，简化了配置文件，使用嵌入式web服务器，含有诸多开箱即用微服务功能，可以和spring cloud联合部署。
-Spring Cloud：
-微服务工具包，为开发者提供了在分布式系统的配置管理、服务发现、断路器、智能路由、微代理、控制总线等开发工具包。
-</code></pre></li>
-<li><p>需要了解如何访问服务、服务间如何通信，服务发现，风险机制（重试，限流，熔断，降级）</p>
-</li>
-<li>API Gateway、服务间调用、服务发现、服务容错、服务部署、数据调用</li>
-<li><p>重要部件</p>
-<pre><code>服务注册中心：etcd、consul、zookeeper
-负载均衡：轮询、加权轮询、IP Hash、最少连接数（当有新的服务连接请求时，将把当前请求分配给连接数最少的服务器）
-容错：容错策略有：快速失败、失效切换、失败安全、失败自动恢复、forking cluster（并行调用多个服务器，只要有一个成功，即返回。）广播调用
-熔断：智能化容错，模式：打开、半开、关闭
-限流和降级：为系统能够处理的服务数量设置一个极限阀值，超过这个阀值的请求则直接拒绝        
-SLA：Service-LevelAgreement的缩写，意思是服务等级协议，关于网络服务供应商和客户间的一份合同，其中定义了服务类型、服务质量和客户付款等术语
-API Gateway：将所有API调用统一接入到API网关层，有网关层统一接入和输出。
-多级缓存：穿透率
-超时和重试：TP99就是满足百分之九十九的网络请求所需要的最低耗时。超时与重试机制也是容错的一种方法，凡是发生RPC调用的地方，比如读取redis，db，mq等，因为网络故障或者是所依赖的服务故障，长时间不能返回结果，就会导致线程增加，加大cpu负载，甚至导致雪崩。所以对每一个RPC调用都要设置超时时间。对于强依赖RPC调用资源的情况，还要有重试机制，但是重试的次数建议1-2次，另外如果有重试，那么超时时间就要相应的调小，比如重试1次，那么一共是发生2次调用。如果超时时间配置的是2s，那么客户端就要等待4s才能返回。因此重试+超时的方式，超时时间要调小。这里也再谈一下一次PRC调用的时间都消耗在哪些环节，一次正常的调用统计的耗时主要包括： ①调用端RPC框架执行时间 + ②网络发送时间 + ③服务端RPC框架执行时间 + ④服务端业务代码时间。调用方和服务方都有各自的性能监控，比如调用方tp99是500ms，服务方tp99是100ms，找了网络组的同事确认网络没有问题。那么时间都花在什么地方了呢，两种原因，客户端调用方，还有一个原因是网络发生TCP重传
-线程池隔离
-网关监控和统计
-</code></pre></li>
-</ol>
-<pre><code>来自：https://blog.csdn.net/wuxiaobingandbob/article/details/78642020?locationNum=1&amp;fps=1
-</code></pre><hr>
-<p><em>他讲了个：</em></p>
-<p><font color="#949494">阳台上一件衣服对另一件衣服说；“兄弟，我干了，你随意”</font><br> </p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1636,7 +1598,7 @@ API Gateway：将所有API调用统一接入到API网关层，有网关层统一
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">41</span>
+                  <span class="site-state-item-count">42</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
