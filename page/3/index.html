@@ -259,6 +259,125 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/10/09/数据结构和算法必知必会的50个代码实现-排序/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="小煤球的反击">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Keep Real">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/10/09/数据结构和算法必知必会的50个代码实现-排序/" itemprop="url">数据结构和算法必知必会的50个代码实现--排序</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-09T14:53:47+08:00">
+                2019-10-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/10/09/数据结构和算法必知必会的50个代码实现-递归/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1498,145 +1617,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/09/26/监控报警系统的调研/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="小煤球的反击">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Keep Real">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/09/26/监控报警系统的调研/" itemprop="url">监控报警系统的调研</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-09-26T13:50:45+08:00">
-                2019-09-26
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="监控报警系统的调研"><a href="#监控报警系统的调研" class="headerlink" title="监控报警系统的调研"></a>监控报警系统的调研</h1><h2 id="一、组件"><a href="#一、组件" class="headerlink" title="一、组件"></a>一、组件</h2><h2 id="二、功能列表"><a href="#二、功能列表" class="headerlink" title="二、功能列表"></a>二、功能列表</h2><p>数据采集：接口、队列、订阅事件等信息的采集</p>
-<p>Td-agent:file</p>
-<p>Bosun支持api</p>
-<p>数据存储：时序数据库</p>
-<p>数据展示：dashboard的展示</p>
-<p>数据预警：预警规则的定义，如通知用户，监控的资源，通知方式等</p>
-<h2 id="三、技术"><a href="#三、技术" class="headerlink" title="三、技术"></a>三、技术</h2><h4 id="1-数据采集"><a href="#1-数据采集" class="headerlink" title="1.数据采集"></a>1.数据采集</h4><p><strong>Telegraf</strong>，支持的监控项有：java应用、http请求、日志、exec脚本、其它常见应用(mongodb，mysql，rabbitmq，redis，nginx，postgresql等)</p>
-<p>支持的写入介质： influxdb、rabbitmq、aws cloudwatch、elasticsearch、file、graphite、graylog、kafka、mqtt、opentsdb、prometheus、socket_writer、tcp、udp</p>
-<h4 id="2-数据存储"><a href="#2-数据存储" class="headerlink" title="2.数据存储"></a>2.数据存储</h4><p>采用时序数据库存储</p>
-<p>Influxdb（InfluxDB集群化要商业版）</p>
-<p>Opentsdb是一个基于HBase、分布式、高可用、可伸缩的时间序列数据库</p>
-<p>（严重依赖Hbase）</p>
-<p>Es（不是严格的时序数据库）</p>
-<h4 id="3-数据预警"><a href="#3-数据预警" class="headerlink" title="3.数据预警"></a>3.数据预警</h4><p>Grafna本身支持简单的告警</p>
-<p>Bosun支持查询OpenTSDB，Graphite和Logstash-Elasticsearch。bosun从TSDB读取时序数据，可以经由bosun表达式做一系列的计算，根据告警策略发送告警，告警的内容是定义好的bosun模板。</p>
-<h4 id="4-数据展示"><a href="#4-数据展示" class="headerlink" title="4.数据展示"></a>4.数据展示</h4><p>Grafna：正式的支持以下数据源Graphite, InfluxDB, OpenTSDB, Prometheus, Elasticsearch, CloudWatch。从4.3版本开始支持MySQL。</p>
-<h2 id="四、方案"><a href="#四、方案" class="headerlink" title="四、方案"></a>四、方案</h2><h3 id="1-常用的"><a href="#1-常用的" class="headerlink" title="1.常用的"></a>1.常用的</h3><p>influxdb+telegraf+Grafana</p>
-<h3 id="2-虎牙直播"><a href="#2-虎牙直播" class="headerlink" title="2.虎牙直播"></a>2.虎牙直播</h3><p>数据采集+OpenTSDB+Grafana+Bosun</p>
-<h3 id="3-基于OpenTSDB"><a href="#3-基于OpenTSDB" class="headerlink" title="3.基于OpenTSDB"></a>3.基于OpenTSDB</h3><p>Tcollector + Celery+ OpenTSDB+Metrilyx+Bosun</p>
-<h3 id="4-小米开源监控系统"><a href="#4-小米开源监控系统" class="headerlink" title="4.小米开源监控系统"></a>4.小米开源监控系统</h3><p>Open-Falcon</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1687,7 +1667,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">42</span>
+                  <span class="site-state-item-count">43</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

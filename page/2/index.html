@@ -259,6 +259,142 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/10/09/Python3-range-函数/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="小煤球的反击">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Keep Real">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/10/09/Python3-range-函数/" itemprop="url">Python3--range()函数</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-09T15:37:45+08:00">
+                2019-10-09
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="range-函数"><a href="#range-函数" class="headerlink" title="range()函数"></a>range()函数</h1><p>结论：python3的range函数相当于python2的xrange函数，python3中没有xrange函数。</p>
+<p>对比返回值：python2的xrange函数返回的是xrange类型，而range函数返回的是list类型，所以内存将会分布相应的长度的空间给list</p>
+<p>优缺点：python2的xrange和python3的range函数返回的是一个对象，没有将数据完全实例化，所以内存中只有一个对象的空间，对性能优化还是很有帮助</p>
+<p>验证过程：</p>
+<p>在python3的builtins.py文件中定义了range对象</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">range</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    range(stop) -&gt; range object</span></span><br><span class="line"><span class="string">    range(start, stop[, step]) -&gt; range object</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    Return an object that produces a sequence of integers from start (inclusive)</span></span><br><span class="line"><span class="string">    to stop (exclusive) by step.  range(i, j) produces i, i+1, i+2, ..., j-1.</span></span><br><span class="line"><span class="string">    start defaults to 0, and stop is omitted!  range(4) produces 0, 1, 2, 3.</span></span><br><span class="line"><span class="string">    These are exactly the valid indices for a list of 4 elements.</span></span><br><span class="line"><span class="string">    When step is given, it specifies the increment (or decrement).</span></span><br><span class="line"><span class="string">    """</span></span><br></pre></td></tr></table></figure>
+<p>返回也是</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Python <span class="number">3.7</span><span class="number">.2</span> (v3<span class="number">.7</span><span class="number">.2</span>:<span class="number">9</span>a3ffc0492, Dec <span class="number">24</span> <span class="number">2018</span>, <span class="number">02</span>:<span class="number">44</span>:<span class="number">43</span>)</span><br><span class="line">[Clang <span class="number">6.0</span> (clang<span class="number">-600.0</span><span class="number">.57</span>)] on darwin</span><br><span class="line">Type <span class="string">"help"</span>, <span class="string">"copyright"</span>, <span class="string">"credits"</span> <span class="keyword">or</span> <span class="string">"license"</span> <span class="keyword">for</span> more information.</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>print(type(range(<span class="number">8</span>)))</span><br><span class="line">&lt;<span class="class"><span class="keyword">class</span> '<span class="title">range</span>'&gt;</span></span><br></pre></td></tr></table></figure>
+<p>python2的__bulitin__.py中定义了range方法,返回的是实例化的list</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">range</span><span class="params">(start=None, stop=None, step=None)</span>:</span> <span class="comment"># known special case of range</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    range(stop) -&gt; list of integers</span></span><br><span class="line"><span class="string">    range(start, stop[, step]) -&gt; list of integers</span></span><br><span class="line"><span class="string">    </span></span><br><span class="line"><span class="string">    Return a list containing an arithmetic progression of integers.</span></span><br><span class="line"><span class="string">    range(i, j) returns [i, i+1, i+2, ..., j-1]; start (!) defaults to 0.</span></span><br><span class="line"><span class="string">    When step is given, it specifies the increment (or decrement).</span></span><br><span class="line"><span class="string">    For example, range(4) returns [0, 1, 2, 3].  The end point is omitted!</span></span><br><span class="line"><span class="string">    These are exactly the valid indices for a list of 4 elements.</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="keyword">pass</span></span><br></pre></td></tr></table></figure>
+<p>输出</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Python <span class="number">2.7</span><span class="number">.16</span> (default, Sep  <span class="number">2</span> <span class="number">2019</span>, <span class="number">11</span>:<span class="number">59</span>:<span class="number">44</span>)</span><br><span class="line">[GCC <span class="number">4.2</span><span class="number">.1</span> Compatible Apple LLVM <span class="number">10.0</span><span class="number">.1</span> (clang<span class="number">-1001.0</span><span class="number">.46</span><span class="number">.4</span>)] on darwin</span><br><span class="line">Type <span class="string">"help"</span>, <span class="string">"copyright"</span>, <span class="string">"credits"</span> <span class="keyword">or</span> <span class="string">"license"</span> <span class="keyword">for</span> more information.</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>print(type(xrange(<span class="number">8</span>)))</span><br><span class="line">&lt;type <span class="string">'xrange'</span>&gt;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>print(type(range(<span class="number">8</span>)))</span><br><span class="line">&lt;type <span class="string">'list'</span>&gt;</span><br></pre></td></tr></table></figure>
+<p><em>注意：像python3将实例化的类型改成对象有很多，如字典中的items</em></p>
+<p>Python3</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> sys</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>print(sys.version)</span><br><span class="line"><span class="number">3.7</span><span class="number">.2</span> (v3<span class="number">.7</span><span class="number">.2</span>:<span class="number">9</span>a3ffc0492, Dec <span class="number">24</span> <span class="number">2018</span>, <span class="number">02</span>:<span class="number">44</span>:<span class="number">43</span>)</span><br><span class="line">[Clang <span class="number">6.0</span> (clang<span class="number">-600.0</span><span class="number">.57</span>)]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a= &#123;<span class="string">'a'</span>:<span class="number">1</span>&#125;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>type(a.items())</span><br><span class="line">&lt;<span class="class"><span class="keyword">class</span> '<span class="title">dict_items</span>'&gt;</span></span><br></pre></td></tr></table></figure>
+<p>python2</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">&gt;&gt;&gt; </span><span class="keyword">import</span> sys</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>print(sys.version)</span><br><span class="line"><span class="number">2.7</span><span class="number">.16</span> (default, Sep  <span class="number">2</span> <span class="number">2019</span>, <span class="number">11</span>:<span class="number">59</span>:<span class="number">44</span>)</span><br><span class="line">[GCC <span class="number">4.2</span><span class="number">.1</span> Compatible Apple LLVM <span class="number">10.0</span><span class="number">.1</span> (clang<span class="number">-1001.0</span><span class="number">.46</span><span class="number">.4</span>)]</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>a = &#123;<span class="string">'a'</span>:<span class="number">1</span>&#125;</span><br><span class="line"><span class="meta">&gt;&gt;&gt; </span>print(type(a.items()))</span><br><span class="line">&lt;type <span class="string">'list'</span>&gt;</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/10/09/数据结构和算法必知必会的50个代码实现-动态规划/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1317,125 +1453,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/10/09/数据结构和算法必知必会的50个代码实现-排序/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="小煤球的反击">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Keep Real">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/10/09/数据结构和算法必知必会的50个代码实现-排序/" itemprop="url">数据结构和算法必知必会的50个代码实现--排序</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-09T14:53:47+08:00">
-                2019-10-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1486,7 +1503,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">42</span>
+                  <span class="site-state-item-count">43</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
