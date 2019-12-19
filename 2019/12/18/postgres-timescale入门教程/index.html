@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css" />
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="postgres,timescaledb," />
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="timescale入门教程介绍TimescaleDB在许多方面的行为都类似于标准PostgreSQL数据库。如下：  与PostgreSQL服务器上的其他TimescaleDB和PostgreSQL数据库共存。 使用SQL作为其接口语言。包含标准数据库对象，例如表，索引和触发器。 使用通用的PostgreSQL连接器连接第三方工具。  数据库实现这种同步的方式是通过将其打包为PostgreSQL扩">
+<meta name="keywords" content="postgres,timescaledb">
+<meta property="og:type" content="article">
+<meta property="og:title" content="postgres-timescaledb入门教程">
+<meta property="og:url" content="https://keepreal.github.io/2019/12/18/postgres-timescale入门教程/index.html">
+<meta property="og:site_name" content="Keep Real">
+<meta property="og:description" content="timescale入门教程介绍TimescaleDB在许多方面的行为都类似于标准PostgreSQL数据库。如下：  与PostgreSQL服务器上的其他TimescaleDB和PostgreSQL数据库共存。 使用SQL作为其接口语言。包含标准数据库对象，例如表，索引和触发器。 使用通用的PostgreSQL连接器连接第三方工具。  数据库实现这种同步的方式是通过将其打包为PostgreSQL扩">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-12-19T09:22:44.148Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="postgres-timescaledb入门教程">
+<meta name="twitter:description" content="timescale入门教程介绍TimescaleDB在许多方面的行为都类似于标准PostgreSQL数据库。如下：  与PostgreSQL服务器上的其他TimescaleDB和PostgreSQL数据库共存。 使用SQL作为其接口语言。包含标准数据库对象，例如表，索引和触发器。 使用通用的PostgreSQL连接器连接第三方工具。  数据库实现这种同步的方式是通过将其打包为PostgreSQL扩">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://keepreal.github.io/2019/12/18/postgres-timescale入门教程/"/>
+
+
+
+
+
+  <title>postgres-timescaledb入门教程 | Keep Real</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Keep Real</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            目录
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/12/18/postgres-timescale入门教程/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="小煤球的反击">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Keep Real">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">postgres-timescaledb入门教程</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-18T16:52:54+08:00">
+                2019-12-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Tech-Doc/" itemprop="url" rel="index">
+                    <span itemprop="name">Tech Doc</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/12/18/postgres-timescale入门教程/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2019/12/18/postgres-timescale入门教程/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="timescale入门教程"><a href="#timescale入门教程" class="headerlink" title="timescale入门教程"></a>timescale入门教程</h1><h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>TimescaleDB在许多方面的行为都类似于标准PostgreSQL数据库。如下：</p>
+<ol>
+<li>与PostgreSQL服务器上的其他TimescaleDB和PostgreSQL数据库共存。</li>
+<li>使用SQL作为其接口语言。包含标准数据库对象，例如表，索引和触发器。</li>
+<li>使用通用的PostgreSQL连接器连接第三方工具。</li>
+</ol>
+<p>数据库实现这种同步的方式是通过将其打包为PostgreSQL扩展，从而将标准PostgreSQL数据库转换为TimescaleDB。</p>
+<p>TimescaleDB提供的超越PostgreSQL的优势主要与处理时序数据有关。 与超级表进行交互时，这些优势最为明显，超级表的行为类似于普通表，但即使将存储扩展到通常禁止的数据量，也能保持高性能。 超表可以参与正常的表操作，包括与标准表的JOIN。</p>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><h3 id="mac"><a href="#mac" class="headerlink" title="mac"></a>mac</h3><ol>
+<li><p>编译&amp;安装</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Add our tap</span></span><br><span class="line">brew tap timescale/tap</span><br><span class="line"></span><br><span class="line"><span class="comment"># To install</span></span><br><span class="line">brew install timescaledb</span><br><span class="line"></span><br><span class="line"><span class="comment"># Post-install to move files to appropriate place</span></span><br><span class="line">/usr/<span class="built_in">local</span>/bin/timescaledb_move.sh</span><br></pre></td></tr></table></figure>
+<p>安装完会提示如下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">RECOMMENDED: Run <span class="string">'timescaledb-tune'</span> to update your config settings <span class="keyword">for</span> TimescaleDB.</span><br><span class="line"></span><br><span class="line">  timescaledb-tune --quiet --yes</span><br><span class="line"></span><br><span class="line">IF NOT, you<span class="string">'ll need to make sure to update /usr/local/var/postgres/postgresql.conf</span></span><br><span class="line"><span class="string">to include the extension:</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">  shared_preload_libraries = '</span>timescaledb<span class="string">'</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">To finish the installation, you will need to run:</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">  timescaledb_move.sh</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">If PostgreSQL is installed via Homebrew, restart it:</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">  brew services restart postgresql</span></span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<ol start="2">
+<li><p>配置数据库</p>
+<p>修改postgresql.conf文件</p>
+<p>在shared_preload_libraries参数中添加timescaledb</p>
+<p>然后重启数据库</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Restart PostgreSQL instance</span></span><br><span class="line">brew services restart postgresql</span><br><span class="line"></span><br><span class="line"><span class="comment"># Add a superuser postgres:</span></span><br><span class="line">createuser postgres -s</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><p>要做的第一件事是创建一个新的空数据库或将现有的PostgreSQL数据库转换为使用TimescaleDB。</p>
+<ol>
+<li><p>链接数据库</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Connect to PostgreSQL, using a superuser named 'postgres'</span></span><br><span class="line">psql -U postgres -h localhost</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<ol start="2">
+<li><p>创建数据库，如果已经有的话就不必创建</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CREATE database tutorial;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<ol start="3">
+<li><p>再上一步的数据库中添加timesaleDB扩展</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">-- Connect to the database</span><br><span class="line">\c tutorial</span><br><span class="line"></span><br><span class="line">-- Extend the database with TimescaleDB</span><br><span class="line">CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h2 id="创建超表"><a href="#创建超表" class="headerlink" title="创建超表"></a>创建超表</h2><p>要创建一个超表，从一个常规SQL表开始，然后通过create_hypertable函数将其转换成一个超表。</p>
+<p>以下示例创建了一个超级表，用于跟踪一段时间内整个设备集合中的温度和湿度。</p>
+<h3 id="创建常规表"><a href="#创建常规表" class="headerlink" title="创建常规表"></a>创建常规表</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- We start by creating a regular SQL table</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> conditions (</span><br><span class="line">  <span class="keyword">time</span>        TIMESTAMPTZ       <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">  location    <span class="built_in">TEXT</span>              <span class="keyword">NOT</span> <span class="literal">NULL</span>,</span><br><span class="line">  temperature <span class="keyword">DOUBLE</span> <span class="keyword">PRECISION</span>  <span class="literal">NULL</span>,</span><br><span class="line">  humidity    <span class="keyword">DOUBLE</span> <span class="keyword">PRECISION</span>  <span class="literal">NULL</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<h3 id="转换成超表"><a href="#转换成超表" class="headerlink" title="转换成超表"></a>转换成超表</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- This creates a hypertable that is partitioned by time</span></span><br><span class="line"><span class="comment">--   using the values in the `time` column.</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">SELECT</span> create_hypertable(<span class="string">'conditions'</span>, <span class="string">'time'</span>);</span><br></pre></td></tr></table></figure>
+<h3 id="插入和查询"><a href="#插入和查询" class="headerlink" title="插入和查询"></a>插入和查询</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> conditions(<span class="keyword">time</span>, location, temperature, humidity)</span><br><span class="line">  <span class="keyword">VALUES</span> (<span class="keyword">NOW</span>(), <span class="string">'office'</span>, <span class="number">70.0</span>, <span class="number">50.0</span>);</span><br></pre></td></tr></table></figure>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> conditions <span class="keyword">ORDER</span> <span class="keyword">BY</span> <span class="keyword">time</span> <span class="keyword">DESC</span> <span class="keyword">LIMIT</span> <span class="number">100</span>;</span><br></pre></td></tr></table></figure>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/postgres/" rel="tag"># postgres</a>
+          
+            <a href="/tags/timescaledb/" rel="tag"># timescaledb</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/12/18/阿里云nginx配置https/" rel="next" title="阿里云nginx配置https">
+                <i class="fa fa-chevron-left"></i> 阿里云nginx配置https
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/12/19/postgres-全文检索/" rel="prev" title="postgres-全文检索">
+                postgres-全文检索 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+      
+        <div id="gitment-container"></div>
+      
+    </div>
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">小煤球的反击</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">43</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">9</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#timescale入门教程"><span class="nav-number">1.</span> <span class="nav-text">timescale入门教程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#介绍"><span class="nav-number">1.1.</span> <span class="nav-text">介绍</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装"><span class="nav-number">1.2.</span> <span class="nav-text">安装</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mac"><span class="nav-number">1.2.1.</span> <span class="nav-text">mac</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置"><span class="nav-number">1.3.</span> <span class="nav-text">配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#创建超表"><span class="nav-number">1.4.</span> <span class="nav-text">创建超表</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#创建常规表"><span class="nav-number">1.4.1.</span> <span class="nav-text">创建常规表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#转换成超表"><span class="nav-number">1.4.2.</span> <span class="nav-text">转换成超表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#插入和查询"><span class="nav-number">1.4.3.</span> <span class="nav-text">插入和查询</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">小煤球的反击</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+<!-- LOCAL: You can save these files to your site and update links -->
+    
+        
+        <link rel="stylesheet" href="https://aimingoo.github.io/gitmint/style/default.css">
+        <script src="https://aimingoo.github.io/gitmint/dist/gitmint.browser.js"></script>
+    
+<!-- END LOCAL -->
+
+    
+
+    
+      <script type="text/javascript">
+      function renderGitment(){
+        var gitment = new Gitmint({
+            id: window.location.pathname, 
+            owner: 'MyZhang0826',
+            repo: 'MyZhang0826.github.io',
+            
+            lang: "" || navigator.language || navigator.systemLanguage || navigator.userLanguage,
+            
+            oauth: {
+            
+            
+                client_secret: 'cfafef229f9f761d8a571819bdcafb1a606eb4df',
+            
+                client_id: '7ed081268804809cadd9'
+            }});
+        gitment.render('gitment-container');
+      }
+
+      
+      renderGitment();
+      
+      </script>
+    
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
