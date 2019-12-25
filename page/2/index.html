@@ -259,6 +259,649 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/10/14/python3-with语句/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="小煤球的反击">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Keep Real">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/10/14/python3-with语句/" itemprop="url">python3--with语句</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-14T11:47:08+08:00">
+                2019-10-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">读书笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="Python-with上下文管理及自定义上下文管理"><a href="#Python-with上下文管理及自定义上下文管理" class="headerlink" title="Python with上下文管理及自定义上下文管理"></a>Python with上下文管理及自定义上下文管理</h1><h2 id="一、上下文管理器"><a href="#一、上下文管理器" class="headerlink" title="一、上下文管理器"></a>一、上下文管理器</h2><p>上下文管理器是对Context Manager的翻译 ,上下文是 context 直译的叫法,在程序中用来表示代码执行过程中所处的前后环境.</p>
+<p>在文件操作时，需要打开，关闭文件，而在文件在进行读写操作时，就是处在文件操作的上下文中，也就是文件操作环境中.</p>
+<p>语法: with</p>
+<p>with 语句是 Pyhton 提供的一种简化语法,从Python 2.5 开始引入的一种与异常处理相关的功能,适用于对资源进行访问的场合,确保不管使用过程中是否发生异常都会执行必要的“扫尾”操作,释放资源.</p>
+<p>比如文件使用后自动关闭、数据库连接的自动关闭等.</p>
+<h2 id="二、with上下文管理器示例"><a href="#二、with上下文管理器示例" class="headerlink" title="二、with上下文管理器示例"></a>二、with上下文管理器示例</h2><p>with open(‘test.txt’, ‘a’) as f:<br>    f.write(‘上下文管理\n’)<br>运行以上代码,会在代码同级目录下创建一个叫test.txt的文本文件,并在文件中追加内容”上下文管理”,并换行.</p>
+<p>在执行 with 语句时，首先执行 with 后面的 open 代码(如果已经有test.txt文件则打开,如果没有test.txt文件则创建),然后通过as将代码的结果保存到 f 中(相当于给test.txt起个别名f,f只是一个变量名,您可以自定义)</p>
+<p>在with下面是对test.txt执行的操作,如示例中的操作是写入内容.</p>
+<p>在操作后，不需要对文件test.txt进行关闭操作f.close()，with上下文管理器会在文件使用完后帮我们关闭test.txt文件.</p>
+<p>这么做即可以简化代码,又可以避免因粗心忘记执行关闭操作而出现异常,因为在实际开发中,打开一个文件后,进行的操作可能非常复杂,这种情况是很可能忘记做”扫尾”操作的.</p>
+<h2 id="三、with上下文管理的原理"><a href="#三、with上下文管理的原理" class="headerlink" title="三、with上下文管理的原理"></a>三、with上下文管理的原理</h2><p>在使用with上下文管理器时,并不是不需要关闭文件,而是文件的关闭操作在 with 的上下文管理器中已经实现了.当文件操作执行完成后,with语句会自动调用上下文管理器里的关闭语句来关闭文件资源.</p>
+<p>我们的应用场景并不是一成必变,with是怎么实现帮我们做”扫尾”操作的呢?</p>
+<p>with语句在执行时,调用上下文管理器中的 <strong>enter</strong> 和 <strong>exit</strong> 两个方法,这两个方法就是上下文管理器中实现的方法.</p>
+<p><strong>enter</strong> 方法会在执行with后面的语句时执行,一般用来处理操作前的内容.比如打开文件,创建对象,初始化等.</p>
+<p><strong>exit</strong> 方法会在with内的代码执行完毕后执行,一般用来处理一些善后收尾工作,比如文件的关闭,数据库的关闭等.</p>
+<h2 id="四、自定义上下文管理器"><a href="#四、自定义上下文管理器" class="headerlink" title="四、自定义上下文管理器"></a>四、自定义上下文管理器</h2><p>根据上下文管理的原理,上下文管理器的原理是实现了<strong>enter</strong>和<strong>exit</strong>这两个方法,所以我们可以根据此原理来自定义自己的上下文管理器.</p>
+<p>在自定义上下文管理器时，只要在类中实现 <strong>enter</strong> 和 <strong>exit</strong> 两个方法即可.</p>
+<p>class OpenFile(object):<br>    “””自定义上下文管理类”””</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, file, mode)</span>:</span></span><br><span class="line">    self._file = file</span><br><span class="line">    self._mode = mode</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__enter__</span><span class="params">(self)</span>:</span></span><br><span class="line">    print(<span class="string">'__enter__  打开文件'</span>)</span><br><span class="line">    self._handle = open(self._file, self._mode)</span><br><span class="line">    <span class="keyword">return</span> self._handle</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__exit__</span><span class="params">(self, exc_type, exc_val, exc_tb)</span>:</span></span><br><span class="line">    print(<span class="string">'__exit__ 关闭文件'</span>)</span><br><span class="line">    self._handle.close()</span><br></pre></td></tr></table></figure>
+<p>with OpenFile(‘test01.txt’, ‘w’) as f:<br>    f.write(‘自定义上下文管理\n’)<br>上面的代码中,我们不是使用Python实现好的open来打开文件,而是通过自定义的OpenFile类来完成文件的操作.</p>
+<p>代码运行过程和结果与用open类似,会先执行OpenFile后的代码(自定义类OpenFile中的代码),如果存在文件test01.txt,打开文件并在其中写入”自定义上下文管理”,如果不存在文件test01.txt,则创建文件并写入”自定义上下文管理”.</p>
+<p>说明我们成功实现了自定义上下文管理.</p>
+<h2 id="五、上下文管理中的自定义异常处理"><a href="#五、上下文管理中的自定义异常处理" class="headerlink" title="五、上下文管理中的自定义异常处理"></a>五、上下文管理中的自定义异常处理</h2><p>我们看到,<strong>exit</strong> 方法中有三个参数exc_type ,exc_val 和exc_tb ,这三个参数是用来接收异常信息的，如果代码在运行时发生异常，异常信息会被保存到这三个参数中.</p>
+<p>class OpenFile(object):<br>    “””自定义上下文管理类”””</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, file, mode)</span>:</span></span><br><span class="line">    self._file = file</span><br><span class="line">    self._mode = mode</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__enter__</span><span class="params">(self)</span>:</span></span><br><span class="line">    self._handle = open(self._file, self._mode)</span><br><span class="line">    <span class="keyword">return</span> self._handle</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__exit__</span><span class="params">(self, exc_type, exc_val, exc_tb)</span>:</span></span><br><span class="line">    print(<span class="string">'Type: '</span>, exc_type)</span><br><span class="line">    print(<span class="string">'Value:'</span>, exc_val)</span><br><span class="line">    print(<span class="string">'TreacBack:'</span>, exc_tb)</span><br><span class="line">    self._handle.close()</span><br></pre></td></tr></table></figure>
+<p>with OpenFile(‘test01.txt’, ‘r’) as f:<br>    f.write(‘自定义上下文管理\n’)<br>上面的代码中,传入的’w’换成了’r’,会出现异常,因为以读的模式打开文件,不能进行写操作.运行结果为:</p>
+<p>Traceback (most recent call last):<br>Type:  <class 'io.unsupportedoperation'=""><br>  File “python_demo/with_demo.py”, line 45, in <module><br>Value: not writable<br>    f.write(‘自定义上下文管理\n’)<br>TreacBack: <traceback object="" at="" 0x0000024ea5e11508=""><br>io.UnsupportedOperation: not writable<br>可以看到我们打印的三个参数exc_type ,exc_val 和exc_tb的值.分别存储了异常的以下信息:</traceback></module></class></p>
+<p>exc_type : 异常类型</p>
+<p>exc_val : 异常值</p>
+<p>exc_tb : 异常回溯追踪</p>
+<p>当with中执行的语句发生异常时,异常信息会被发送到 <strong>exit</strong> 方法的参数中,这时可以根据情况选择如何处理异常.</p>
+<p>因为在 <strong>exit</strong>函数执行异常处理时,会根据函数的返回值决定是否将系统抛出的异常继续向外抛出.如果返回值为 False 就会向外抛出,用户就会看到.如果返回值为 True 不会向外抛出,而是显示我们自定义的信息.</p>
+<p>我们可以根据这个原理自定义如何处理异常,只要将返回值设置为True就行了.</p>
+<p>class OpenFile(object):<br>    “””自定义上下文管理类”””</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, file, mode)</span>:</span></span><br><span class="line">    self._file = file</span><br><span class="line">    self._mode = mode</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__enter__</span><span class="params">(self)</span>:</span></span><br><span class="line">    self._handle = open(self._file, self._mode)</span><br><span class="line">    <span class="keyword">return</span> self._handle</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__exit__</span><span class="params">(self, exc_type, exc_val, exc_tb)</span>:</span></span><br><span class="line">    self._handle.close()</span><br><span class="line">    <span class="comment"># 通过exc_type参数接收到的值，来判断程序执行是否出现异常</span></span><br><span class="line">    <span class="comment"># 如果是None,说明没有异常</span></span><br><span class="line">    <span class="keyword">if</span> exc_type == <span class="string">"None"</span>:</span><br><span class="line">        print(<span class="string">'正常执行'</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="comment"># 否则出现异常，可以选择怎么处理异常</span></span><br><span class="line">        print(exc_type, exc_val)</span><br><span class="line">    <span class="comment"># 返回值决定了捕获的异常是否继续向外抛出</span></span><br><span class="line">    <span class="comment"># 如果是False那么就会继续向外抛出，程序会看到系统提示的异常信息</span></span><br><span class="line">    <span class="comment"># 如果是True不会向外抛出,程序看不到系统提示信息，只能看到else中的输出</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">True</span></span><br></pre></td></tr></table></figure>
+<p>with OpenFile(‘test01.txt’, ‘r’) as f:<br>    f.write(‘自定义上下文管理\n’)<br>通过设置返回值为True,上下文管理器不会向外抛出异常,此时我们在根据exc_type(异常类型)的值是否为”None”来自定义输出的异常信息,就可以实现上下文管理中的自定义异常了.<br>————————————————</p>
+<p>版权声明：本文为CSDN博主「Python碎片」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。<br>原文链接：<a href="https://blog.csdn.net/weixin_43790276/article/details/90216525" target="_blank" rel="noopener">https://blog.csdn.net/weixin_43790276/article/details/90216525</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/10/14/python3-分布式消息队列Celery/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="小煤球的反击">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Keep Real">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/10/14/python3-分布式消息队列Celery/" itemprop="url">python3--分布式消息队列Celery</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-14T10:55:42+08:00">
+                2019-10-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">读书笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/10/12/python3-垃圾回收-GC/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="小煤球的反击">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Keep Real">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/10/12/python3-垃圾回收-GC/" itemprop="url">python3--垃圾回收(GC)</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-12T14:41:39+08:00">
+                2019-10-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">读书笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="垃圾回收算法（GC）"><a href="#垃圾回收算法（GC）" class="headerlink" title="垃圾回收算法（GC）"></a>垃圾回收算法（GC）</h1><h2 id="引用计数（Reference-Counting）"><a href="#引用计数（Reference-Counting）" class="headerlink" title="引用计数（Reference Counting）"></a>引用计数（Reference Counting）</h2><p>所谓‘’万物皆对象‘’，python每一个对象的核心就是如下的结构体PyObject</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">typedef struct_object &#123;</span><br><span class="line">    int ob_refcnt;</span><br><span class="line">    struct_typeobject *ob_type;</span><br><span class="line">&#125; PyObject;</span><br></pre></td></tr></table></figure>
+<p>在结构体中内部都有一个引用计数器（ob_refcnt）表示引用当前对象的数量</p>
+<p>程序运行中会实时更新ob_refcnt的值，一旦引用计数器为0，内存直接释放</p>
+<h5 id="ob-refcnt加1的情况"><a href="#ob-refcnt加1的情况" class="headerlink" title="ob_refcnt加1的情况"></a>ob_refcnt加1的情况</h5><ul>
+<li>对象被创建，例如a=2</li>
+<li>对象被引用，b=a</li>
+<li>对象被作为参数，传入到一个函数中</li>
+<li>对象作为一个元素，存储在容器中，容器是指列表、字典、用户自定义类的对象、元组等</li>
+</ul>
+<h5 id="ob-refcnt减1的情况"><a href="#ob-refcnt减1的情况" class="headerlink" title="ob_refcnt减1的情况"></a>ob_refcnt减1的情况</h5><ul>
+<li>对象别名被显示销毁 del</li>
+<li>对象别名被赋予新的对象</li>
+<li>一个对象离开他的作用域</li>
+<li>对象所在的容器被销毁或者是从容器中删除对象</li>
+</ul>
+<p>缺点：会产生循环引用问题，如下：</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt;a = &#123; &#125; <span class="comment">#对象A的引用计数为 1</span></span><br><span class="line">&gt;&gt;&gt;b = &#123; &#125; <span class="comment">#对象B的引用计数为 1</span></span><br><span class="line">&gt;&gt;&gt;a[<span class="string">'b'</span>] = b  <span class="comment">#B的引用计数增1</span></span><br><span class="line">&gt;&gt;&gt;b[<span class="string">'a'</span>] = a  <span class="comment">#A的引用计数增1</span></span><br><span class="line">&gt;&gt;&gt;<span class="keyword">del</span> a <span class="comment">#A的引用减 1，最后A对象的引用为 1</span></span><br><span class="line">&gt;&gt;&gt;<span class="keyword">del</span> b <span class="comment">#B的引用减 1, 最后B对象的引用为 1</span></span><br></pre></td></tr></table></figure>
+<p>这样a，b会一直驻留在内存中，就会造成了内存泄漏（内存空间在使用完毕后未释放）</p>
+<p>为解决此问题，python引入了标记清除和分代回收两种GC机制</p>
+<h2 id="标记-清除（Mark-and-Sweep）"><a href="#标记-清除（Mark-and-Sweep）" class="headerlink" title="标记-清除（Mark and Sweep）"></a>标记-清除（Mark and Sweep）</h2><p>标记-清除机制是基于追踪回收（tracing GC）实现的，分为两个阶段</p>
+<ul>
+<li>标记，会把所有的活动对象打上标记</li>
+<li>清除，把没有标记的对象即非活动对象进行回收</li>
+</ul>
+<p>对象之间通过引用（指针）连在一起，构成一个有向图，对象构成这个有向图的节点，而引用关系构成这个有向图的边。从根对象（root object）出发，沿着有向边遍历对象，可达的（reachable）对象标记为活动对象，不可达的对象就是要被清除的非活动对象。根对象就是全局变量、调用栈、寄存器。(作者：天澄链接：<a href="https://juejin.im/post/5ca2471df265da307b2d45a3来源：掘金著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处" target="_blank" rel="noopener">https://juejin.im/post/5ca2471df265da307b2d45a3来源：掘金著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处</a>)</p>
+<p>把小黑圈视为全局变量，也就是把它作为root object，从小黑圈出发，对象1可直达，那么它将被标记，对象2、3可间接到达也会被标记，而4和5不可达，那么1、2、3就是活动对象，4和5是非活动对象会被GC回收。</p>
+<p>缺点：清除非活动的对象前它必须顺序扫描整个堆内存，哪怕只剩下小部分活动对象也要扫描所有对象。</p>
+<h2 id="分代回收（Generational-Collection）"><a href="#分代回收（Generational-Collection）" class="headerlink" title="分代回收（Generational Collection）"></a>分代回收（Generational Collection）</h2><p><em>分代回收是基于标记-清除机制的基础上，进行以空间换时间的操作方式</em></p>
+<p>​    分代回收是基于这样的一个统计事实，<strong>对于程序，存在一定比例的内存块的生存周期比较短；而剩下的内存块，生存周期会比较长，甚至会从程序开始一直持续到程序结束。生存期较短对象的比例通常在 80%～90% 之间，这种思想简单点说就是：对象存在时间越长，越可能不是垃圾，应该越少去收集。这样在执行标记-清除算法时可以有效减小遍历的对象数，从而提高垃圾回收的速度。</strong></p>
+<p>​     Python将内存根据对象的存活时间划分为不同的集合，每个集合称为一个代，Python将内存分为了3“代”，分别为年轻代（第0代）、中年代（第1代）、老年代（第2代）,对应的是3个链表，它们的垃圾收集频率随着对象的存活时间的增大而减小。</p>
+<p>​    新创建的对象都会分配在年轻代，<strong>当某一世代中被分配的对象与被释放的对象之差达到某一阈值的时候，就会触发gc对某一世代的扫描。</strong>Python垃圾收集机制就会被触发，把那些可以被回收的对象回收掉，而那些不会回收的对象就会被移到中年代去，依此类推，老年代中的对象是存活时间最久的对象，甚至是存活于整个系统的生命周期内。</p>
+<p>​    <strong>值得注意的是当某一世代的扫描被触发的时候，比该世代年轻的世代也会被扫描。</strong>也就是说如果世代2的gc扫描被触发了，那么世代0,世代1也将被扫描，如果世代1的gc扫描被触发，世代0也会被扫描。</p>
+<p>查看和调整阈值</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sys; print(<span class="string">'Python %s on %s'</span> % (sys.version, sys.platform))</span><br><span class="line">Python <span class="number">3.7</span><span class="number">.2</span> (v3<span class="number">.7</span><span class="number">.2</span>:<span class="number">9</span>a3ffc0492, Dec <span class="number">24</span> <span class="number">2018</span>, <span class="number">02</span>:<span class="number">44</span>:<span class="number">43</span>) </span><br><span class="line">[Clang <span class="number">6.0</span> (clang<span class="number">-600.0</span><span class="number">.57</span>)] on darwin</span><br><span class="line"><span class="keyword">import</span> gc</span><br><span class="line">gc.get_threshold()</span><br><span class="line">(<span class="number">700</span>, <span class="number">10</span>, <span class="number">10</span>)</span><br><span class="line">gc.set_threshold(<span class="number">500</span>,<span class="number">5</span>,<span class="number">5</span>)</span><br><span class="line">gc.get_threshold()</span><br><span class="line">(<span class="number">500</span>, <span class="number">5</span>, <span class="number">5</span>)</span><br></pre></td></tr></table></figure>
+<p><strong>总结：引用计数在处理容器对象时list、dict、tuple等会出现循环引用问题。标记-清除机制是为了解决容器循环引用问题，但是耗时较长，而分代回收则已空间换时间的方式优化标记-清除的问题。</strong></p>
+<p>参考链接：</p>
+<p><a href="https://juejin.im/post/5cdb8216e51d456e781f20e0" target="_blank" rel="noopener">https://juejin.im/post/5cdb8216e51d456e781f20e0</a></p>
+<p><a href="https://andrewpqc.github.io/2018/10/08/python-memory-management/#more" target="_blank" rel="noopener">https://andrewpqc.github.io/2018/10/08/python-memory-management/#more</a></p>
+<p><a href="https://juejin.im/entry/5ac4746a6fb9a028d700d13b" target="_blank" rel="noopener">https://juejin.im/entry/5ac4746a6fb9a028d700d13b</a></p>
+<p><a href="https://juejin.im/post/5ca2471df265da307b2d45a3" target="_blank" rel="noopener">https://juejin.im/post/5ca2471df265da307b2d45a3</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/10/12/python3-多线程/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="小煤球的反击">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Keep Real">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/10/12/python3-多线程/" itemprop="url">python3--多线程</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-12T10:34:43+08:00">
+                2019-10-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">读书笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p>进程是操作系统分配资源的最小单元，线程是操作系统调度的最小单元</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/10/09/Python3-装饰器/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -1149,570 +1792,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/10/09/数据结构和算法必知必会的50个代码实现-图/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="小煤球的反击">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Keep Real">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/10/09/数据结构和算法必知必会的50个代码实现-图/" itemprop="url">数据结构和算法必知必会的50个代码实现--图</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-09T14:54:34+08:00">
-                2019-10-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/数据结构和算法/" itemprop="url" rel="index">
-                    <span itemprop="name">数据结构和算法</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/10/09/数据结构和算法必知必会的50个代码实现-堆/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="小煤球的反击">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Keep Real">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/10/09/数据结构和算法必知必会的50个代码实现-堆/" itemprop="url">数据结构和算法必知必会的50个代码实现--堆</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-09T14:54:23+08:00">
-                2019-10-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/数据结构和算法/" itemprop="url" rel="index">
-                    <span itemprop="name">数据结构和算法</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/10/09/数据结构和算法必知必会的50个代码实现-二叉树/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="小煤球的反击">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Keep Real">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/10/09/数据结构和算法必知必会的50个代码实现-二叉树/" itemprop="url">数据结构和算法必知必会的50个代码实现--二叉树</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-09T14:54:16+08:00">
-                2019-10-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/数据结构和算法/" itemprop="url" rel="index">
-                    <span itemprop="name">数据结构和算法</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/10/09/数据结构和算法必知必会的50个代码实现-字符串/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="小煤球的反击">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Keep Real">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/10/09/数据结构和算法必知必会的50个代码实现-字符串/" itemprop="url">数据结构和算法必知必会的50个代码实现--字符串</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-09T14:54:08+08:00">
-                2019-10-09
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/数据结构和算法/" itemprop="url" rel="index">
-                    <span itemprop="name">数据结构和算法</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1763,7 +1842,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">43</span>
+                  <span class="site-state-item-count">47</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

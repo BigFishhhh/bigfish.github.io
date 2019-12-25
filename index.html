@@ -259,6 +259,573 @@
   
   
   <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/12/25/python协程的理解与使用/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="小煤球的反击">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Keep Real">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/12/25/python协程的理解与使用/" itemprop="url">python协程的理解与使用</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-25T11:22:26+08:00">
+                2019-12-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <p><strong>简介：</strong>作为在日常开发生产中非常实用的语言，有必要掌握一些python用法，比如爬虫、网络请求等场景，很是实用。但python是单线程的，如何提高python的处理速度，是一个很重要的问题，这个问题的一个关键技术，叫协程。本篇文章，讲讲python协程的理解与使用，主要是针对网络请求这个模块做一个梳理，希望能帮到有需要的同学。</p>
+<h1 id="概念篇"><a href="#概念篇" class="headerlink" title="概念篇"></a>概念篇</h1><p>在理解协程这个概念及其作用场景前，先要了解几个基本的关于操作系统的概念，主要是进程、线程、同步、异步、阻塞、非阻塞，了解这几个概念，不仅是对协程这个场景，诸如消息队列、缓存等，都有一定的帮助。接下来，编者就自己的理解和网上查询的材料，做一个总结。</p>
+<h4 id="进程"><a href="#进程" class="headerlink" title="进程"></a><strong>进程</strong></h4><p>在面试的时候，我们都会记住一个概念，<strong>进程是系统资源分配的最小单位</strong>。是的，系统由一个个程序，也就是进程组成的，一般情况下，分为<strong>文本区域</strong>、<strong>数据区域</strong>和<strong>堆栈区域</strong>。</p>
+<p>文本区域<strong>存储处理器执行的代码</strong>(机器码)，通常来说，这是一个只读区域，防止运行的程序被意外修改。</p>
+<p>数据区域<strong>存储所有的变量和动态分配的内存</strong>，又细分为初始化的数据区(所有初始化的全局、静态、常量，以及外部变量)和为初始化的数据区(初始化为0的全局变量和静态变量)，初始化的变量最初保存在文本区，程序启动后被拷贝到初始化的数据区。</p>
+<p>堆栈区域<strong>存储着活动过程调用的指令和本地变量</strong>，在地址空间里，<strong>栈区紧连着堆区</strong>，他们的增长方向相反，内存是线性的，所以我们代码放在低地址的地方，由低向高增长，栈区大小不可预测，随开随用，因此放在高地址的地方，由高向低增长。当<strong>堆和栈指针重合的时候，意味着内存耗尽，造成内存溢出</strong>。</p>
+<p>进程的创建和销毁都是相对于系统资源，非常消耗资源，是一种比较昂贵的操作。进程为了自身能得到运行，必须要<strong>抢占式的争夺CPU</strong>。对于单核CPU来说，在同一时间只能执行一个进程的代码，所以在单核CPU上实现多进程，是通过CPU快速的切换不同进程，看上去就像是多个进程在同时进行。</p>
+<p>由于<strong>进程间是隔离的，各自拥有自己的内存内存资源</strong>，相比于线程的共同共享内存来说，相对安全，不同进程之间的数据只能通过 IPC(Inter-Process Communication) 进行通信共享。</p>
+<h4 id="线程"><a href="#线程" class="headerlink" title="线程"></a><strong>线程</strong></h4><p><strong>线程是CPU调度的最小单位</strong>。如果进程是一个容器，线程就是运行在容器里面的程序，线程是属于进程的，同个进程的多个线程共享进程的内存地址空间。</p>
+<p>线程间的通信可以直接通过<strong>全局变量</strong>进行通信，所以相对来说，线程间通信是不太安全的，因此引入了<strong>各种锁</strong>的场景，不在这里阐述。</p>
+<p>当一个线程崩溃了,会导致整个进程也崩溃了,即其他线程也挂了, 但多进程而不会,一个进程挂了，另一个进程依然照样运行。</p>
+<p>在多核操作系统中，默认进程内只有一个线程，所以对多进程的处理就像是一个进程一个核心。</p>
+<h4 id="同步和异步"><a href="#同步和异步" class="headerlink" title="同步和异步"></a><strong>同步和异步</strong></h4><p>同步和异步关注的是消息通信机制，所谓同步，就是在发出一个函数调用时，在没有得到结果之前，该调用不会返回。一旦调用返回，就立即得到执行的返回值，即<strong>调用者主动等待调用结果</strong>。所谓异步，就是在请求发出去后，这个调用就立即返回，没有返回结果，通过回调等方式告知该调用的实际结果。</p>
+<p>同步的请求，需要主动读写数据，并且等待结果；异步的请求，调用者不会立刻得到结果。而是在调用发出后，被调用者通过状态、通知来通知调用者，或通过回调函数处理这个调用。</p>
+<h4 id="阻塞和非阻塞"><a href="#阻塞和非阻塞" class="headerlink" title="阻塞和非阻塞"></a>阻塞和非阻塞</h4><p>阻塞和非阻塞关注的是程序在等待调用结果（消息，返回值）时的状态。</p>
+<p>阻塞调用是指<strong>调用结果返回之前，当前线程会被挂起</strong>。调用线程只有在得到结果之后才会返回。非阻塞调用指在不能立刻得到结果之前，该调用不会阻塞当前线程。所以，区分的条件在于，<strong>进程/线程要访问的数据是否就绪，进程/线程是否需要等待</strong>。</p>
+<p>非阻塞一般通过多路复用实现，多路复用有 select、poll、epoll几种实现方式。</p>
+<h4 id="协程"><a href="#协程" class="headerlink" title="协程"></a><strong>协程</strong></h4><p>在了解前面的几个概念后，我们再来看协程的概念。</p>
+<p>协程是属于线程的，又称微线程，纤程，英文名Coroutine。举个例子，在执行函数A时，我希望随时中断去执行函数B，然后中断B的执行，切换回来执行A。这就是协程的作用，由调用者自由切换。这个切换过程并不是等同于函数调用，因为它没有调用语句。执行方式与多线程类似，但是协程只有一个线程执行。</p>
+<p>协程的优点是执行效率非常高，因为协程的切换由程序自身控制，不需要切换线程，即没有切换线程的开销。同时，由于只有一个线程，不存在冲突问题，不需要依赖锁(加锁与释放锁存在很多资源消耗)。</p>
+<p>协程主要的使用场景在于处理<strong>IO密集型</strong>程序，解决效率问题，不适用于CPU密集型程序的处理。然而实际场景中这两种场景非常多，如果要充分发挥CPU利用率，可以结合多进程+协程的方式。后续我们会讲到结合点。</p>
+<h1 id="原理篇"><a href="#原理篇" class="headerlink" title="原理篇"></a>原理篇</h1><p>根据wikipedia的定义，协程是一个无优先级的子程序调度组件，允许子程序在特点的地方挂起恢复。所以理论上，只要内存足够，一个线程中可以有任意多个协程，但同一时刻只能有一个协程在运行，多个协程分享该线程分配到的计算机资源。协程是为了充分发挥异步调用的优势，异步操作则是为了避免IO操作阻塞线程。</p>
+<h4 id="知识准备"><a href="#知识准备" class="headerlink" title="知识准备"></a><strong>知识准备</strong></h4><p>在了解原理前，我们先做一个知识的准备工作。</p>
+<p>1）现代主流的操作系统几乎都是分时操作系统，即一台计算机采用时间片轮转的方式为多个用户服务，系统资源分配的基本单位是进程，CPU调度的基本单位是线程。</p>
+<p>2）运行时内存空间分为变量区，栈区，堆区。内存地址分配上，堆区从低地到高，栈区从高往低。</p>
+<p>3）计算机执行时一条条指令读取执行，执行到当前指令时，下一条指令的地址在指令寄存器的IP中，ESP寄存值指向当前栈顶地址，EBP指向当前活动栈帧的基地址。</p>
+<p>4）系统发生函数调用时操作为：先将入参从右往左依次压栈，然后把返回地址压栈，最后将当前EBP寄存器的值压栈，修改ESP寄存器的值，在栈区分配当前函数局部变量所需的空间。</p>
+<p>5）协程的上下文包含属于当前协程的栈区和寄存器里面存放的值。</p>
+<h4 id="事件循环"><a href="#事件循环" class="headerlink" title="事件循环"></a><strong>事件循环</strong></h4><p>在python3.3中，通过关键字yield from使用协程，在3.5中，引入了关于协程的语法糖async和await，我们主要看async/await的原理解析。其中，事件循环是一个核心所在，编写过 js的同学，会对事件循环Eventloop更加了解, 事件循环是一种等待程序分配事件或消息的编程架构(维基百科)。在python中，asyncio.coroutine 修饰器用来标记作为协程的函数, 这里的协程是和asyncio及其事件循环一起使用的，而在后续的发展中，async/await被使用的越来越广泛。</p>
+<p>async/await</p>
+<p>async/await是使用python协程的关键，从结构上来看，asyncio 实质上是一个异步框架，async/await 是为异步框架提供的 API已方便使用者调用，所以使用者要想使用async/await 编写协程代码，目前必须机遇 asyncio 或其他异步库。</p>
+<h4 id="Future"><a href="#Future" class="headerlink" title="Future"></a><strong>Future</strong></h4><p>在实际开发编写异步代码时，为了避免太多的回调方法导致的回调地狱，但又需要获取异步调用的返回结果结果，聪明的语言设计者设计了一个 叫Future的对象，封装了与loop 的交互行为。其大致执行过程为：程序启动后，通过add_done_callback 方法向 epoll 注册回调函数，当 result 属性得到返回值后，主动运行之前注册的回调函数，向上传递给 coroutine。这个Future对象为asyncio.Future。</p>
+<p>但是，要想取得返回值，程序必须恢复恢复工作状态，而由于Future 对象本身的生存周期比较短，每一次注册回调、产生事件、触发回调过程后工作可能已经完成，所以用 Future 向生成器 send result 并不合适。所以这里又引入一个新的对象 Task，保存在Future 对象中，对生成器协程进行状态管理。</p>
+<p>Python 里另一个 Future 对象是 concurrent.futures.Future，与 asyncio.Future 互不兼容，容易产生混淆。区别点在于，concurrent.futures 是线程级的 Future 对象，当使用 concurrent.futures.Executor 进行多线程编程时，该对象用于在不同的 thread 之间传递结果。</p>
+<h4 id="Task"><a href="#Task" class="headerlink" title="Task"></a><strong>Task</strong></h4><p>上文中提到，Task是维护生成器协程状态处理执行逻辑的的任务对象，Task 中有一个_step 方法，负责生成器协程与 EventLoop 交互过程的状态迁移，整个过程可以理解为：Task向协程 send 一个值，恢复其工作状态。当协程运行到断点后，得到新的Future对象，再处理 future 与 loop 的回调注册过程。</p>
+<h4 id="Loop"><a href="#Loop" class="headerlink" title="Loop"></a><strong>Loop</strong></h4><p>在日常开发中，会有一个误区，认为每个线程都可以有一个独立的 loop。实际运行时，主线程才能通过 asyncio.get_event_loop() 创建一个新的 loop，而在其他线程时，使用 get_event_loop() 却会抛错。正确的做法为通过 asyncio.set_event_loop() ，将当前线程与 主线程的loop 显式绑定。</p>
+<p>Loop有一个很大的缺陷，就是 loop 的运行状态不受 Python 代码控制，所以在业务处理中，无法稳定的将协程拓展到多线程中运行。</p>
+<p><img src="https://segmentfault.com/img/remote/1460000021382802" alt="1201.png"></p>
+<h1 id="实战篇"><a href="#实战篇" class="headerlink" title="实战篇"></a>实战篇</h1><p>介绍完概念和原理，我来看看如何使用，这里，举一个实际场景的例子，来看看如何使用python的协程。</p>
+<h4 id="场景"><a href="#场景" class="headerlink" title="场景"></a><strong>场景</strong></h4><p>外部接收一些文件，每个文件里有一组数据，其中，这组数据需要通过http的方式，发向第三方平台，并获得结果。</p>
+<h4 id="分析"><a href="#分析" class="headerlink" title="分析"></a><strong>分析</strong></h4><p>由于同一个文件的每一组数据没有前后的处理逻辑，在之前通过Requests库发送的网络请求，串行执行，下一组数据的发送需要等待上一组数据的返回，显得整个文件的处理时间长，这种请求方式，完全可以由协程来实现。</p>
+<p>为了更方便的配合协程发请求，我们使用aiohttp库来代替requests库，关于aiohttp，这里不做过多剖析，仅做下简单介绍。</p>
+<h4 id="aiohttp"><a href="#aiohttp" class="headerlink" title="aiohttp"></a><strong>aiohttp</strong></h4><p>aiohttp是asyncio和Python的异步HTTP客户端/服务器，由于是异步的，经常用在服务区端接收请求，和客户端爬虫应用，发起异步请求，这里我们主要用来发请求。</p>
+<p>aiohttp支持客户端和HTTP服务器，可以实现单线程并发IO操作，无需使用Callback Hell即可支持Server WebSockets和Client WebSockets，且具有中间件。</p>
+<h4 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a><strong>代码实现</strong></h4><p>直接上代码了，talk is cheap, show me the code~<br><strong>源代码地址：</strong><a href="https://developer.aliyun.com/article/740183?utm_content=g_1000095415" target="_blank" rel="noopener">https://developer.aliyun.com/article/740183?utm_content=g_1000095415</a></p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/12/25/程序员的心理疾病摘抄/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="小煤球的反击">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Keep Real">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/12/25/程序员的心理疾病摘抄/" itemprop="url">程序员的心理疾病摘抄</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-25T10:46:49+08:00">
+                2019-12-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">读书笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <blockquote>
+<p>文章来自 <a href="http://www.yinwang.org/blog-cn/2014/02/09/programmer-mental" target="_blank" rel="noopener">http://www.yinwang.org/blog-cn/2014/02/09/programmer-mental</a></p>
+</blockquote>
+<h3 id="无自知之明"><a href="#无自知之明" class="headerlink" title="无自知之明"></a>无自知之明</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">“软件工程”这个名词根本就是扯淡的，软件工程师也不能被叫做“工程师”。跟其他的工程不一样，软件工程并不是建立在科学的基础上的—计算机科学其实不是科学。</span><br></pre></td></tr></table></figure>
+<h3 id="垃圾当宝贝"><a href="#垃圾当宝贝" class="headerlink" title="垃圾当宝贝"></a>垃圾当宝贝</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">“软件工程”是穷途末路的领域，因为它的目标是：如果我不会写程序的话，怎么样才能写出程序？</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">为了达到这个愚蠢的目的，很多人开始兜售各种像减肥药一样的东西。面向对象方法，软件“重用”，设计模式，关系式数据库，NoSQL，大数据……</span><br></pre></td></tr></table></figure>
+<h3 id="宗教斗争"><a href="#宗教斗争" class="headerlink" title="宗教斗争"></a>宗教斗争</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">这就是为什么有人说在软件行业里需要不停地“学习”，因为不断地有人为了制造新的理念而制造新的理念</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">在这样一个行业里，你会很难找到一个只把程序语言或者技术当成是工具的人</span><br></pre></td></tr></table></figure>
+<h3 id="引难为豪"><a href="#引难为豪" class="headerlink" title="引难为豪"></a>引难为豪</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">在 IT 行业里批评一个技术难用，是一件非常容易伤自尊的事情，因为立马会有人噼里啪啦打出一些稀奇古怪的命令或者一大篇代码，说：就是这么简单！然后你就发现，这些人完全不明白什么叫做设计，他们以自己能用最快的速度绕过各种前人的设计失误为豪，很多程序员甚至以自己打字快为豪</span><br></pre></td></tr></table></figure>
+<h3 id="去读文档！"><a href="#去读文档！" class="headerlink" title="去读文档！"></a>去读文档！</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">当你希望同事能给你一个手把手的演示的时候，他们往往会丢给你一篇不知道什么时候写的文档，让你自己去读，仿佛文档就可以代替人之间的直接互动。况且不说这文档可能已经过时，里面有很多地方已经不符合最新的设计，而这意味着在潜意识里，他们觉得高你一等。</span><br><span class="line"></span><br><span class="line">对于这种现象有一个专门的词汇，叫做 RTFM（Read The Fucking Manual）</span><br></pre></td></tr></table></figure>
+<h3 id="不要提问，不要谦虚，不要恭维"><a href="#不要提问，不要谦虚，不要恭维" class="headerlink" title="不要提问，不要谦虚，不要恭维"></a>不要提问，不要谦虚，不要恭维</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">程序员世界里的一条重要的潜规则是：只有菜鸟才会问问题。</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">跟江湖一样，在 IT 公司里面一件很重要的事情是，亮出自己的宝剑和绝招，给人下马威。介绍自己的东西一定要自豪，这就是世界上最好的，无敌的，没有其他人能做到！不能有任何保留。</span><br></pre></td></tr></table></figure>
+<h3 id="以语言取人"><a href="#以语言取人" class="headerlink" title="以语言取人"></a>以语言取人</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">很多程序员都以自己会用最近流行的一些新语言为豪，以为有了它们自己就成了更好的程序员。他们看不到，用新的语言并不能让他们成为更好的程序员</span><br></pre></td></tr></table></figure>
+<p><strong>最厉害的程序员无论用什么语言都能写出很好的代码。在他们的头脑里其实只有一种很简单的语言，他们首先用这种语言把问题建模出来，然后根据实际需要“翻译”成最后的代码。这种在头脑里的建模过程的价值，是很难用他最后用语言的优劣来衡量的。</strong></p>
+<h3 id="跟屁虫"><a href="#跟屁虫" class="headerlink" title="跟屁虫"></a>跟屁虫</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">我并不认为 Java 是很好的语言，然而 Python 也好不到哪去。它们在我眼里只不过是临时拿来用一下的工具，可是我仍然能用它们写出一流的代码。</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">看到这些宗教性质的聚会，我终于理解了一些地区是如何被从一个国家分裂出去，最后沦落为另外一个国家殖民地的。最早的时候，一般是派传教士过去“传经”，然后就煽动一小部分人起来造反。到后来就可以名正言顺的以“保护传教士”，“保护宗教自由”，“维持和平”等理由把军舰开到别人家门口……</span><br></pre></td></tr></table></figure>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/12/25/Java-PK-Python/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="小煤球的反击">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Keep Real">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/12/25/Java-PK-Python/" itemprop="url">Java PK Python</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-25T10:44:14+08:00">
+                2019-12-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/12/23/postgres-TimescaleDB-查询语句/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="小煤球的反击">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Keep Real">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/12/23/postgres-TimescaleDB-查询语句/" itemprop="url">postgres-TimescaleDB 查询语句</a></h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-23T10:23:26+08:00">
+                2019-12-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="TimescaleDB-查询语句"><a href="#TimescaleDB-查询语句" class="headerlink" title="TimescaleDB 查询语句"></a>TimescaleDB 查询语句</h1><p>TimescaleDB 超表查询语句和postgres查询语句是一样的方式，都是用标准的sql查询命令</p>
+<h2 id="SELECT-命令"><a href="#SELECT-命令" class="headerlink" title="SELECT 命令"></a>SELECT 命令</h2><p>用标准的postgres的 SELECT sql命令，包括 WHERE分句，GROUP BY和 ORDER BY 命令，join,子查询，窗口函数，用户自定义的函数HAVING分句等等。</p>
+<p>基本查询：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- Return the last 100 entries written to the 'conditions' hypertable</span></span><br><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> conditions <span class="keyword">LIMIT</span> <span class="number">100</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Return the most recent 100 entries ordered newest to oldest</span></span><br><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> conditions <span class="keyword">ORDER</span> <span class="keyword">BY</span> <span class="keyword">time</span> <span class="keyword">DESC</span> <span class="keyword">LIMIT</span> <span class="number">100</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Return the number of data entries written in past 12 hours</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">FROM</span> conditions</span><br><span class="line">  <span class="keyword">WHERE</span> <span class="keyword">time</span> &gt; <span class="keyword">NOW</span>() - <span class="built_in">interval</span> <span class="string">'12 hours'</span>;</span><br></pre></td></tr></table></figure>
+<p>更高级的查询</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- Information about each 15-min period for each location</span></span><br><span class="line"><span class="comment">-- over the past 3 hours, ordered by time and temperature</span></span><br><span class="line"><span class="keyword">SELECT</span> time_bucket(<span class="string">'15 minutes'</span>, <span class="keyword">time</span>) <span class="keyword">AS</span> fifteen_min,</span><br><span class="line">    location, <span class="keyword">COUNT</span>(*),</span><br><span class="line">    <span class="keyword">MAX</span>(temperature) <span class="keyword">AS</span> max_temp,</span><br><span class="line">    <span class="keyword">MAX</span>(humidity) <span class="keyword">AS</span> max_hum</span><br><span class="line">  <span class="keyword">FROM</span> conditions</span><br><span class="line">  <span class="keyword">WHERE</span> <span class="keyword">time</span> &gt; <span class="keyword">NOW</span>() - <span class="built_in">interval</span> <span class="string">'3 hours'</span></span><br><span class="line">  <span class="keyword">GROUP</span> <span class="keyword">BY</span> fifteen_min, location</span><br><span class="line">  <span class="keyword">ORDER</span> <span class="keyword">BY</span> fifteen_min <span class="keyword">DESC</span>, max_temp <span class="keyword">DESC</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">-- How many distinct locations with air conditioning</span></span><br><span class="line"><span class="comment">-- have reported data in the past day</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> location) <span class="keyword">FROM</span> conditions</span><br><span class="line">  <span class="keyword">JOIN</span> locations</span><br><span class="line">    <span class="keyword">ON</span> conditions.location = locations.location</span><br><span class="line">  <span class="keyword">WHERE</span> locations.air_conditioning = <span class="literal">True</span></span><br><span class="line">    <span class="keyword">AND</span> <span class="keyword">time</span> &gt; <span class="keyword">NOW</span>() - <span class="built_in">interval</span> <span class="string">'1 day'</span></span><br></pre></td></tr></table></figure>
+<h2 id="高级分析查询"><a href="#高级分析查询" class="headerlink" title="高级分析查询"></a>高级分析查询</h2><p>TimescaleDB可以用来多种多样的分析查询</p>
+<p>通过对PostgreSQL的全部SQL功能的本机支持以及为TimescaleDB添加的其他功能（为了易于使用和更好的查询优化），TimescaleDB可以用于各种分析查询。</p>
+
+          
+        
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
     <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/12/19/linux命令记录/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -624,7 +1191,7 @@
       
         
           
-            <h1 id="timescale入门教程"><a href="#timescale入门教程" class="headerlink" title="timescale入门教程"></a>timescale入门教程</h1><h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>TimescaleDB在许多方面的行为都类似于标准PostgreSQL数据库。如下：</p>
+            <h1 id="TimescaleDb入门教程"><a href="#TimescaleDb入门教程" class="headerlink" title="TimescaleDb入门教程"></a>TimescaleDb入门教程</h1><h2 id="介绍"><a href="#介绍" class="headerlink" title="介绍"></a>介绍</h2><p>TimescaleDB在许多方面的行为都类似于标准PostgreSQL数据库。如下：</p>
 <ol>
 <li>与PostgreSQL服务器上的其他TimescaleDB和PostgreSQL数据库共存。</li>
 <li>使用SQL作为其接口语言。包含标准数据库对象，例如表，索引和触发器。</li>
@@ -1166,649 +1733,6 @@
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/10/14/python3-with语句/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="小煤球的反击">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Keep Real">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/10/14/python3-with语句/" itemprop="url">python3--with语句</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-14T11:47:08+08:00">
-                2019-10-14
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">读书笔记</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="Python-with上下文管理及自定义上下文管理"><a href="#Python-with上下文管理及自定义上下文管理" class="headerlink" title="Python with上下文管理及自定义上下文管理"></a>Python with上下文管理及自定义上下文管理</h1><h2 id="一、上下文管理器"><a href="#一、上下文管理器" class="headerlink" title="一、上下文管理器"></a>一、上下文管理器</h2><p>上下文管理器是对Context Manager的翻译 ,上下文是 context 直译的叫法,在程序中用来表示代码执行过程中所处的前后环境.</p>
-<p>在文件操作时，需要打开，关闭文件，而在文件在进行读写操作时，就是处在文件操作的上下文中，也就是文件操作环境中.</p>
-<p>语法: with</p>
-<p>with 语句是 Pyhton 提供的一种简化语法,从Python 2.5 开始引入的一种与异常处理相关的功能,适用于对资源进行访问的场合,确保不管使用过程中是否发生异常都会执行必要的“扫尾”操作,释放资源.</p>
-<p>比如文件使用后自动关闭、数据库连接的自动关闭等.</p>
-<h2 id="二、with上下文管理器示例"><a href="#二、with上下文管理器示例" class="headerlink" title="二、with上下文管理器示例"></a>二、with上下文管理器示例</h2><p>with open(‘test.txt’, ‘a’) as f:<br>    f.write(‘上下文管理\n’)<br>运行以上代码,会在代码同级目录下创建一个叫test.txt的文本文件,并在文件中追加内容”上下文管理”,并换行.</p>
-<p>在执行 with 语句时，首先执行 with 后面的 open 代码(如果已经有test.txt文件则打开,如果没有test.txt文件则创建),然后通过as将代码的结果保存到 f 中(相当于给test.txt起个别名f,f只是一个变量名,您可以自定义)</p>
-<p>在with下面是对test.txt执行的操作,如示例中的操作是写入内容.</p>
-<p>在操作后，不需要对文件test.txt进行关闭操作f.close()，with上下文管理器会在文件使用完后帮我们关闭test.txt文件.</p>
-<p>这么做即可以简化代码,又可以避免因粗心忘记执行关闭操作而出现异常,因为在实际开发中,打开一个文件后,进行的操作可能非常复杂,这种情况是很可能忘记做”扫尾”操作的.</p>
-<h2 id="三、with上下文管理的原理"><a href="#三、with上下文管理的原理" class="headerlink" title="三、with上下文管理的原理"></a>三、with上下文管理的原理</h2><p>在使用with上下文管理器时,并不是不需要关闭文件,而是文件的关闭操作在 with 的上下文管理器中已经实现了.当文件操作执行完成后,with语句会自动调用上下文管理器里的关闭语句来关闭文件资源.</p>
-<p>我们的应用场景并不是一成必变,with是怎么实现帮我们做”扫尾”操作的呢?</p>
-<p>with语句在执行时,调用上下文管理器中的 <strong>enter</strong> 和 <strong>exit</strong> 两个方法,这两个方法就是上下文管理器中实现的方法.</p>
-<p><strong>enter</strong> 方法会在执行with后面的语句时执行,一般用来处理操作前的内容.比如打开文件,创建对象,初始化等.</p>
-<p><strong>exit</strong> 方法会在with内的代码执行完毕后执行,一般用来处理一些善后收尾工作,比如文件的关闭,数据库的关闭等.</p>
-<h2 id="四、自定义上下文管理器"><a href="#四、自定义上下文管理器" class="headerlink" title="四、自定义上下文管理器"></a>四、自定义上下文管理器</h2><p>根据上下文管理的原理,上下文管理器的原理是实现了<strong>enter</strong>和<strong>exit</strong>这两个方法,所以我们可以根据此原理来自定义自己的上下文管理器.</p>
-<p>在自定义上下文管理器时，只要在类中实现 <strong>enter</strong> 和 <strong>exit</strong> 两个方法即可.</p>
-<p>class OpenFile(object):<br>    “””自定义上下文管理类”””</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, file, mode)</span>:</span></span><br><span class="line">    self._file = file</span><br><span class="line">    self._mode = mode</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__enter__</span><span class="params">(self)</span>:</span></span><br><span class="line">    print(<span class="string">'__enter__  打开文件'</span>)</span><br><span class="line">    self._handle = open(self._file, self._mode)</span><br><span class="line">    <span class="keyword">return</span> self._handle</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__exit__</span><span class="params">(self, exc_type, exc_val, exc_tb)</span>:</span></span><br><span class="line">    print(<span class="string">'__exit__ 关闭文件'</span>)</span><br><span class="line">    self._handle.close()</span><br></pre></td></tr></table></figure>
-<p>with OpenFile(‘test01.txt’, ‘w’) as f:<br>    f.write(‘自定义上下文管理\n’)<br>上面的代码中,我们不是使用Python实现好的open来打开文件,而是通过自定义的OpenFile类来完成文件的操作.</p>
-<p>代码运行过程和结果与用open类似,会先执行OpenFile后的代码(自定义类OpenFile中的代码),如果存在文件test01.txt,打开文件并在其中写入”自定义上下文管理”,如果不存在文件test01.txt,则创建文件并写入”自定义上下文管理”.</p>
-<p>说明我们成功实现了自定义上下文管理.</p>
-<h2 id="五、上下文管理中的自定义异常处理"><a href="#五、上下文管理中的自定义异常处理" class="headerlink" title="五、上下文管理中的自定义异常处理"></a>五、上下文管理中的自定义异常处理</h2><p>我们看到,<strong>exit</strong> 方法中有三个参数exc_type ,exc_val 和exc_tb ,这三个参数是用来接收异常信息的，如果代码在运行时发生异常，异常信息会被保存到这三个参数中.</p>
-<p>class OpenFile(object):<br>    “””自定义上下文管理类”””</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, file, mode)</span>:</span></span><br><span class="line">    self._file = file</span><br><span class="line">    self._mode = mode</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__enter__</span><span class="params">(self)</span>:</span></span><br><span class="line">    self._handle = open(self._file, self._mode)</span><br><span class="line">    <span class="keyword">return</span> self._handle</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__exit__</span><span class="params">(self, exc_type, exc_val, exc_tb)</span>:</span></span><br><span class="line">    print(<span class="string">'Type: '</span>, exc_type)</span><br><span class="line">    print(<span class="string">'Value:'</span>, exc_val)</span><br><span class="line">    print(<span class="string">'TreacBack:'</span>, exc_tb)</span><br><span class="line">    self._handle.close()</span><br></pre></td></tr></table></figure>
-<p>with OpenFile(‘test01.txt’, ‘r’) as f:<br>    f.write(‘自定义上下文管理\n’)<br>上面的代码中,传入的’w’换成了’r’,会出现异常,因为以读的模式打开文件,不能进行写操作.运行结果为:</p>
-<p>Traceback (most recent call last):<br>Type:  <class 'io.unsupportedoperation'=""><br>  File “python_demo/with_demo.py”, line 45, in <module><br>Value: not writable<br>    f.write(‘自定义上下文管理\n’)<br>TreacBack: <traceback object="" at="" 0x0000024ea5e11508=""><br>io.UnsupportedOperation: not writable<br>可以看到我们打印的三个参数exc_type ,exc_val 和exc_tb的值.分别存储了异常的以下信息:</traceback></module></class></p>
-<p>exc_type : 异常类型</p>
-<p>exc_val : 异常值</p>
-<p>exc_tb : 异常回溯追踪</p>
-<p>当with中执行的语句发生异常时,异常信息会被发送到 <strong>exit</strong> 方法的参数中,这时可以根据情况选择如何处理异常.</p>
-<p>因为在 <strong>exit</strong>函数执行异常处理时,会根据函数的返回值决定是否将系统抛出的异常继续向外抛出.如果返回值为 False 就会向外抛出,用户就会看到.如果返回值为 True 不会向外抛出,而是显示我们自定义的信息.</p>
-<p>我们可以根据这个原理自定义如何处理异常,只要将返回值设置为True就行了.</p>
-<p>class OpenFile(object):<br>    “””自定义上下文管理类”””</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, file, mode)</span>:</span></span><br><span class="line">    self._file = file</span><br><span class="line">    self._mode = mode</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__enter__</span><span class="params">(self)</span>:</span></span><br><span class="line">    self._handle = open(self._file, self._mode)</span><br><span class="line">    <span class="keyword">return</span> self._handle</span><br><span class="line"> </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">__exit__</span><span class="params">(self, exc_type, exc_val, exc_tb)</span>:</span></span><br><span class="line">    self._handle.close()</span><br><span class="line">    <span class="comment"># 通过exc_type参数接收到的值，来判断程序执行是否出现异常</span></span><br><span class="line">    <span class="comment"># 如果是None,说明没有异常</span></span><br><span class="line">    <span class="keyword">if</span> exc_type == <span class="string">"None"</span>:</span><br><span class="line">        print(<span class="string">'正常执行'</span>)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="comment"># 否则出现异常，可以选择怎么处理异常</span></span><br><span class="line">        print(exc_type, exc_val)</span><br><span class="line">    <span class="comment"># 返回值决定了捕获的异常是否继续向外抛出</span></span><br><span class="line">    <span class="comment"># 如果是False那么就会继续向外抛出，程序会看到系统提示的异常信息</span></span><br><span class="line">    <span class="comment"># 如果是True不会向外抛出,程序看不到系统提示信息，只能看到else中的输出</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">True</span></span><br></pre></td></tr></table></figure>
-<p>with OpenFile(‘test01.txt’, ‘r’) as f:<br>    f.write(‘自定义上下文管理\n’)<br>通过设置返回值为True,上下文管理器不会向外抛出异常,此时我们在根据exc_type(异常类型)的值是否为”None”来自定义输出的异常信息,就可以实现上下文管理中的自定义异常了.<br>————————————————</p>
-<p>版权声明：本文为CSDN博主「Python碎片」的原创文章，遵循 CC 4.0 BY-SA 版权协议，转载请附上原文出处链接及本声明。<br>原文链接：<a href="https://blog.csdn.net/weixin_43790276/article/details/90216525" target="_blank" rel="noopener">https://blog.csdn.net/weixin_43790276/article/details/90216525</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/10/14/python3-分布式消息队列Celery/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="小煤球的反击">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Keep Real">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/10/14/python3-分布式消息队列Celery/" itemprop="url">python3--分布式消息队列Celery</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-14T10:55:42+08:00">
-                2019-10-14
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">读书笔记</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/10/12/python3-垃圾回收-GC/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="小煤球的反击">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Keep Real">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/10/12/python3-垃圾回收-GC/" itemprop="url">python3--垃圾回收(GC)</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-12T14:41:39+08:00">
-                2019-10-12
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">读书笔记</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <h1 id="垃圾回收算法（GC）"><a href="#垃圾回收算法（GC）" class="headerlink" title="垃圾回收算法（GC）"></a>垃圾回收算法（GC）</h1><h2 id="引用计数（Reference-Counting）"><a href="#引用计数（Reference-Counting）" class="headerlink" title="引用计数（Reference Counting）"></a>引用计数（Reference Counting）</h2><p>所谓‘’万物皆对象‘’，python每一个对象的核心就是如下的结构体PyObject</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">typedef struct_object &#123;</span><br><span class="line">    int ob_refcnt;</span><br><span class="line">    struct_typeobject *ob_type;</span><br><span class="line">&#125; PyObject;</span><br></pre></td></tr></table></figure>
-<p>在结构体中内部都有一个引用计数器（ob_refcnt）表示引用当前对象的数量</p>
-<p>程序运行中会实时更新ob_refcnt的值，一旦引用计数器为0，内存直接释放</p>
-<h5 id="ob-refcnt加1的情况"><a href="#ob-refcnt加1的情况" class="headerlink" title="ob_refcnt加1的情况"></a>ob_refcnt加1的情况</h5><ul>
-<li>对象被创建，例如a=2</li>
-<li>对象被引用，b=a</li>
-<li>对象被作为参数，传入到一个函数中</li>
-<li>对象作为一个元素，存储在容器中，容器是指列表、字典、用户自定义类的对象、元组等</li>
-</ul>
-<h5 id="ob-refcnt减1的情况"><a href="#ob-refcnt减1的情况" class="headerlink" title="ob_refcnt减1的情况"></a>ob_refcnt减1的情况</h5><ul>
-<li>对象别名被显示销毁 del</li>
-<li>对象别名被赋予新的对象</li>
-<li>一个对象离开他的作用域</li>
-<li>对象所在的容器被销毁或者是从容器中删除对象</li>
-</ul>
-<p>缺点：会产生循环引用问题，如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">&gt;&gt;&gt;a = &#123; &#125; <span class="comment">#对象A的引用计数为 1</span></span><br><span class="line">&gt;&gt;&gt;b = &#123; &#125; <span class="comment">#对象B的引用计数为 1</span></span><br><span class="line">&gt;&gt;&gt;a[<span class="string">'b'</span>] = b  <span class="comment">#B的引用计数增1</span></span><br><span class="line">&gt;&gt;&gt;b[<span class="string">'a'</span>] = a  <span class="comment">#A的引用计数增1</span></span><br><span class="line">&gt;&gt;&gt;<span class="keyword">del</span> a <span class="comment">#A的引用减 1，最后A对象的引用为 1</span></span><br><span class="line">&gt;&gt;&gt;<span class="keyword">del</span> b <span class="comment">#B的引用减 1, 最后B对象的引用为 1</span></span><br></pre></td></tr></table></figure>
-<p>这样a，b会一直驻留在内存中，就会造成了内存泄漏（内存空间在使用完毕后未释放）</p>
-<p>为解决此问题，python引入了标记清除和分代回收两种GC机制</p>
-<h2 id="标记-清除（Mark-and-Sweep）"><a href="#标记-清除（Mark-and-Sweep）" class="headerlink" title="标记-清除（Mark and Sweep）"></a>标记-清除（Mark and Sweep）</h2><p>标记-清除机制是基于追踪回收（tracing GC）实现的，分为两个阶段</p>
-<ul>
-<li>标记，会把所有的活动对象打上标记</li>
-<li>清除，把没有标记的对象即非活动对象进行回收</li>
-</ul>
-<p>对象之间通过引用（指针）连在一起，构成一个有向图，对象构成这个有向图的节点，而引用关系构成这个有向图的边。从根对象（root object）出发，沿着有向边遍历对象，可达的（reachable）对象标记为活动对象，不可达的对象就是要被清除的非活动对象。根对象就是全局变量、调用栈、寄存器。(作者：天澄链接：<a href="https://juejin.im/post/5ca2471df265da307b2d45a3来源：掘金著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处" target="_blank" rel="noopener">https://juejin.im/post/5ca2471df265da307b2d45a3来源：掘金著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处</a>)</p>
-<p>把小黑圈视为全局变量，也就是把它作为root object，从小黑圈出发，对象1可直达，那么它将被标记，对象2、3可间接到达也会被标记，而4和5不可达，那么1、2、3就是活动对象，4和5是非活动对象会被GC回收。</p>
-<p>缺点：清除非活动的对象前它必须顺序扫描整个堆内存，哪怕只剩下小部分活动对象也要扫描所有对象。</p>
-<h2 id="分代回收（Generational-Collection）"><a href="#分代回收（Generational-Collection）" class="headerlink" title="分代回收（Generational Collection）"></a>分代回收（Generational Collection）</h2><p><em>分代回收是基于标记-清除机制的基础上，进行以空间换时间的操作方式</em></p>
-<p>​    分代回收是基于这样的一个统计事实，<strong>对于程序，存在一定比例的内存块的生存周期比较短；而剩下的内存块，生存周期会比较长，甚至会从程序开始一直持续到程序结束。生存期较短对象的比例通常在 80%～90% 之间，这种思想简单点说就是：对象存在时间越长，越可能不是垃圾，应该越少去收集。这样在执行标记-清除算法时可以有效减小遍历的对象数，从而提高垃圾回收的速度。</strong></p>
-<p>​     Python将内存根据对象的存活时间划分为不同的集合，每个集合称为一个代，Python将内存分为了3“代”，分别为年轻代（第0代）、中年代（第1代）、老年代（第2代）,对应的是3个链表，它们的垃圾收集频率随着对象的存活时间的增大而减小。</p>
-<p>​    新创建的对象都会分配在年轻代，<strong>当某一世代中被分配的对象与被释放的对象之差达到某一阈值的时候，就会触发gc对某一世代的扫描。</strong>Python垃圾收集机制就会被触发，把那些可以被回收的对象回收掉，而那些不会回收的对象就会被移到中年代去，依此类推，老年代中的对象是存活时间最久的对象，甚至是存活于整个系统的生命周期内。</p>
-<p>​    <strong>值得注意的是当某一世代的扫描被触发的时候，比该世代年轻的世代也会被扫描。</strong>也就是说如果世代2的gc扫描被触发了，那么世代0,世代1也将被扫描，如果世代1的gc扫描被触发，世代0也会被扫描。</p>
-<p>查看和调整阈值</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> sys; print(<span class="string">'Python %s on %s'</span> % (sys.version, sys.platform))</span><br><span class="line">Python <span class="number">3.7</span><span class="number">.2</span> (v3<span class="number">.7</span><span class="number">.2</span>:<span class="number">9</span>a3ffc0492, Dec <span class="number">24</span> <span class="number">2018</span>, <span class="number">02</span>:<span class="number">44</span>:<span class="number">43</span>) </span><br><span class="line">[Clang <span class="number">6.0</span> (clang<span class="number">-600.0</span><span class="number">.57</span>)] on darwin</span><br><span class="line"><span class="keyword">import</span> gc</span><br><span class="line">gc.get_threshold()</span><br><span class="line">(<span class="number">700</span>, <span class="number">10</span>, <span class="number">10</span>)</span><br><span class="line">gc.set_threshold(<span class="number">500</span>,<span class="number">5</span>,<span class="number">5</span>)</span><br><span class="line">gc.get_threshold()</span><br><span class="line">(<span class="number">500</span>, <span class="number">5</span>, <span class="number">5</span>)</span><br></pre></td></tr></table></figure>
-<p><strong>总结：引用计数在处理容器对象时list、dict、tuple等会出现循环引用问题。标记-清除机制是为了解决容器循环引用问题，但是耗时较长，而分代回收则已空间换时间的方式优化标记-清除的问题。</strong></p>
-<p>参考链接：</p>
-<p><a href="https://juejin.im/post/5cdb8216e51d456e781f20e0" target="_blank" rel="noopener">https://juejin.im/post/5cdb8216e51d456e781f20e0</a></p>
-<p><a href="https://andrewpqc.github.io/2018/10/08/python-memory-management/#more" target="_blank" rel="noopener">https://andrewpqc.github.io/2018/10/08/python-memory-management/#more</a></p>
-<p><a href="https://juejin.im/entry/5ac4746a6fb9a028d700d13b" target="_blank" rel="noopener">https://juejin.im/entry/5ac4746a6fb9a028d700d13b</a></p>
-<p><a href="https://juejin.im/post/5ca2471df265da307b2d45a3" target="_blank" rel="noopener">https://juejin.im/post/5ca2471df265da307b2d45a3</a></p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/10/12/python3-多线程/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="小煤球的反击">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.gif">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Keep Real">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/10/12/python3-多线程/" itemprop="url">python3--多线程</a></h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-12T10:34:43+08:00">
-                2019-10-12
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/读书笔记/" itemprop="url" rel="index">
-                    <span itemprop="name">读书笔记</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>进程是操作系统分配资源的最小单元，线程是操作系统调度的最小单元</p>
-
-          
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -1859,7 +1783,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">43</span>
+                  <span class="site-state-item-count">47</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

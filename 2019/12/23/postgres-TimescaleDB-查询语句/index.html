@@ -79,17 +79,17 @@
 
 
 
-<meta name="description" content="CGI">
+<meta name="description" content="TimescaleDB 查询语句TimescaleDB 超表查询语句和postgres查询语句是一样的方式，都是用标准的sql查询命令 SELECT 命令用标准的postgres的 SELECT sql命令，包括 WHERE分句，GROUP BY和 ORDER BY 命令，join,子查询，窗口函数，用户自定义的函数HAVING分句等等。 基本查询： 123456789-- Return the">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Python在web应用上的部署">
-<meta property="og:url" content="https://keepreal.github.io/2019/03/13/pyhton_web/index.html">
+<meta property="og:title" content="postgres-TimescaleDB 查询语句">
+<meta property="og:url" content="https://keepreal.github.io/2019/12/23/postgres-TimescaleDB-查询语句/index.html">
 <meta property="og:site_name" content="Keep Real">
-<meta property="og:description" content="CGI">
+<meta property="og:description" content="TimescaleDB 查询语句TimescaleDB 超表查询语句和postgres查询语句是一样的方式，都是用标准的sql查询命令 SELECT 命令用标准的postgres的 SELECT sql命令，包括 WHERE分句，GROUP BY和 ORDER BY 命令，join,子查询，窗口函数，用户自定义的函数HAVING分句等等。 基本查询： 123456789-- Return the">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-03-13T02:38:55.656Z">
+<meta property="og:updated_time" content="2019-12-23T02:32:59.891Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Python在web应用上的部署">
-<meta name="twitter:description" content="CGI">
+<meta name="twitter:title" content="postgres-TimescaleDB 查询语句">
+<meta name="twitter:description" content="TimescaleDB 查询语句TimescaleDB 超表查询语句和postgres查询语句是一样的方式，都是用标准的sql查询命令 SELECT 命令用标准的postgres的 SELECT sql命令，包括 WHERE分句，GROUP BY和 ORDER BY 命令，join,子查询，窗口函数，用户自定义的函数HAVING分句等等。 基本查询： 123456789-- Return the">
 
 
 
@@ -119,13 +119,13 @@
 
 
 
-  <link rel="canonical" href="https://keepreal.github.io/2019/03/13/pyhton_web/"/>
+  <link rel="canonical" href="https://keepreal.github.io/2019/12/23/postgres-TimescaleDB-查询语句/"/>
 
 
 
 
 
-  <title>Python在web应用上的部署 | Keep Real</title>
+  <title>postgres-TimescaleDB 查询语句 | Keep Real</title>
   
 
 
@@ -262,7 +262,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/03/13/pyhton_web/">
+    <link itemprop="mainEntityOfPage" href="https://keepreal.github.io/2019/12/23/postgres-TimescaleDB-查询语句/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="小煤球的反击">
@@ -279,7 +279,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">Python在web应用上的部署</h1>
+          <h1 class="post-title" itemprop="name headline">postgres-TimescaleDB 查询语句</h1>
         
 
         <div class="post-meta">
@@ -291,8 +291,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-03-13T10:37:00+08:00">
-                2019-03-13
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-23T10:23:26+08:00">
+                2019-12-23
               </time>
             
 
@@ -310,8 +310,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2019/03/13/pyhton_web/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count gitment-comments-count" data-xid="/2019/03/13/pyhton_web/" itemprop="commentsCount"></span>
+                <a href="/2019/12/23/postgres-TimescaleDB-查询语句/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count gitment-comments-count" data-xid="/2019/12/23/postgres-TimescaleDB-查询语句/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -339,7 +339,14 @@
       
 
       
-        <p>CGI</p>
+        <h1 id="TimescaleDB-查询语句"><a href="#TimescaleDB-查询语句" class="headerlink" title="TimescaleDB 查询语句"></a>TimescaleDB 查询语句</h1><p>TimescaleDB 超表查询语句和postgres查询语句是一样的方式，都是用标准的sql查询命令</p>
+<h2 id="SELECT-命令"><a href="#SELECT-命令" class="headerlink" title="SELECT 命令"></a>SELECT 命令</h2><p>用标准的postgres的 SELECT sql命令，包括 WHERE分句，GROUP BY和 ORDER BY 命令，join,子查询，窗口函数，用户自定义的函数HAVING分句等等。</p>
+<p>基本查询：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- Return the last 100 entries written to the 'conditions' hypertable</span></span><br><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> conditions <span class="keyword">LIMIT</span> <span class="number">100</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Return the most recent 100 entries ordered newest to oldest</span></span><br><span class="line"><span class="keyword">SELECT</span> * <span class="keyword">FROM</span> conditions <span class="keyword">ORDER</span> <span class="keyword">BY</span> <span class="keyword">time</span> <span class="keyword">DESC</span> <span class="keyword">LIMIT</span> <span class="number">100</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Return the number of data entries written in past 12 hours</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(*) <span class="keyword">FROM</span> conditions</span><br><span class="line">  <span class="keyword">WHERE</span> <span class="keyword">time</span> &gt; <span class="keyword">NOW</span>() - <span class="built_in">interval</span> <span class="string">'12 hours'</span>;</span><br></pre></td></tr></table></figure>
+<p>更高级的查询</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- Information about each 15-min period for each location</span></span><br><span class="line"><span class="comment">-- over the past 3 hours, ordered by time and temperature</span></span><br><span class="line"><span class="keyword">SELECT</span> time_bucket(<span class="string">'15 minutes'</span>, <span class="keyword">time</span>) <span class="keyword">AS</span> fifteen_min,</span><br><span class="line">    location, <span class="keyword">COUNT</span>(*),</span><br><span class="line">    <span class="keyword">MAX</span>(temperature) <span class="keyword">AS</span> max_temp,</span><br><span class="line">    <span class="keyword">MAX</span>(humidity) <span class="keyword">AS</span> max_hum</span><br><span class="line">  <span class="keyword">FROM</span> conditions</span><br><span class="line">  <span class="keyword">WHERE</span> <span class="keyword">time</span> &gt; <span class="keyword">NOW</span>() - <span class="built_in">interval</span> <span class="string">'3 hours'</span></span><br><span class="line">  <span class="keyword">GROUP</span> <span class="keyword">BY</span> fifteen_min, location</span><br><span class="line">  <span class="keyword">ORDER</span> <span class="keyword">BY</span> fifteen_min <span class="keyword">DESC</span>, max_temp <span class="keyword">DESC</span>;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">-- How many distinct locations with air conditioning</span></span><br><span class="line"><span class="comment">-- have reported data in the past day</span></span><br><span class="line"><span class="keyword">SELECT</span> <span class="keyword">COUNT</span>(<span class="keyword">DISTINCT</span> location) <span class="keyword">FROM</span> conditions</span><br><span class="line">  <span class="keyword">JOIN</span> locations</span><br><span class="line">    <span class="keyword">ON</span> conditions.location = locations.location</span><br><span class="line">  <span class="keyword">WHERE</span> locations.air_conditioning = <span class="literal">True</span></span><br><span class="line">    <span class="keyword">AND</span> <span class="keyword">time</span> &gt; <span class="keyword">NOW</span>() - <span class="built_in">interval</span> <span class="string">'1 day'</span></span><br></pre></td></tr></table></figure>
+<h2 id="高级分析查询"><a href="#高级分析查询" class="headerlink" title="高级分析查询"></a>高级分析查询</h2><p>TimescaleDB可以用来多种多样的分析查询</p>
+<p>通过对PostgreSQL的全部SQL功能的本机支持以及为TimescaleDB添加的其他功能（为了易于使用和更好的查询优化），TimescaleDB可以用于各种分析查询。</p>
 
       
     </div>
@@ -364,8 +371,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/07/15/problems/" rel="next" title="遇到的问题">
-                <i class="fa fa-chevron-left"></i> 遇到的问题
+              <a href="/2019/12/19/linux命令记录/" rel="next" title="linux命令记录">
+                <i class="fa fa-chevron-left"></i> linux命令记录
               </a>
             
           </div>
@@ -374,8 +381,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2019/09/26/Bosun-Bosun中创建报警规则/" rel="prev" title="Bosun--Bosun中创建报警规则">
-                Bosun--Bosun中创建报警规则 <i class="fa fa-chevron-right"></i>
+              <a href="/2019/12/25/Java-PK-Python/" rel="prev" title="Java PK Python">
+                Java PK Python <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -435,8 +442,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -496,6 +512,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#TimescaleDB-查询语句"><span class="nav-number">1.</span> <span class="nav-text">TimescaleDB 查询语句</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#SELECT-命令"><span class="nav-number">1.1.</span> <span class="nav-text">SELECT 命令</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#高级分析查询"><span class="nav-number">1.2.</span> <span class="nav-text">高级分析查询</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
